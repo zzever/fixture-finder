@@ -9,19 +9,869 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300..700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
-/* See full source at https://github.com/zzever/fixture-finder */
-body { font-family: 'Inter', sans-serif; background: #0d0e11; color: #e2e6f0; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; text-align: center; }
-.box { max-width: 500px; padding: 2rem; }
-h1 { font-size: 1.8rem; margin-bottom: 1rem; }
-p { color: #8a93aa; }
-a { color: #4a9eff; }
+:root,[data-theme="dark"]{
+  --color-bg:#0d0e11;
+  --color-surface:#13151a;
+  --color-surface-2:#181b22;
+  --color-surface-offset:#1e2230;
+  --color-border:#2a2f3e;
+  --color-divider:#1f2435;
+  --color-text:#e2e6f0;
+  --color-text-muted:#8a93aa;
+  --color-text-faint:#4a5168;
+  --color-primary:#4a9eff;
+  --color-primary-hover:#6eb3ff;
+  --color-primary-active:#2a7ee8;
+  --color-primary-highlight:#0d2040;
+  --color-accent-ma2:#f5a623;
+  --color-accent-ma3:#00d4ff;
+  --color-accent-avo:#e84040;
+  --color-accent-gdtf:#9b59b6;
+  --color-success:#3ddc84;
+  --color-warning:#f5a623;
+  --color-error:#e84040;
+  --radius-sm:4px;
+  --radius-md:8px;
+  --radius-lg:12px;
+  --radius-xl:16px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.4);
+  --shadow-md:0 4px 16px rgba(0,0,0,.5);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.6);
+  --font-body:'Inter','Helvetica Neue',sans-serif;
+  --font-mono:'JetBrains Mono','Courier New',monospace;
+  --text-xs:clamp(.7rem,.65rem+.25vw,.8rem);
+  --text-sm:clamp(.8rem,.75rem+.25vw,.9rem);
+  --text-base:clamp(.9rem,.85rem+.25vw,1rem);
+  --text-lg:clamp(1rem,.9rem+.5vw,1.25rem);
+  --text-xl:clamp(1.2rem,1rem+1vw,1.6rem);
+  --text-2xl:clamp(1.5rem,1.2rem+1.5vw,2.2rem);
+  --space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;
+  --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;
+  --space-12:3rem;--space-16:4rem;
+  --transition:180ms cubic-bezier(.16,1,.3,1);
+}
+[data-theme="light"]{
+  --color-bg:#f4f5f8;
+  --color-surface:#ffffff;
+  --color-surface-2:#f9fafb;
+  --color-surface-offset:#eef0f5;
+  --color-border:#d8dce8;
+  --color-divider:#e4e7f0;
+  --color-text:#1a1d2e;
+  --color-text-muted:#5a6180;
+  --color-text-faint:#a0a8c0;
+  --color-primary:#1a6fd4;
+  --color-primary-hover:#0d5abf;
+  --color-primary-active:#0a4aa8;
+  --color-primary-highlight:#ddeeff;
+  --color-accent-ma2:#b07010;
+  --color-accent-ma3:#006080;
+  --color-accent-avo:#b02020;
+  --color-accent-gdtf:#7b3f9e;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.1);
+  --shadow-md:0 4px 16px rgba(0,0,0,.12);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.15);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scroll-behavior:smooth}
+body{font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);min-height:100dvh;line-height:1.6}
+img,svg{display:block;max-width:100%}
+button,input{font:inherit;color:inherit;cursor:pointer}
+input{cursor:text}
+button{background:none;border:none}
+
+/* LAYOUT */
+.app{display:grid;grid-template-rows:auto 1fr;min-height:100dvh}
+.header{background:var(--color-surface);border-bottom:1px solid var(--color-border);padding:var(--space-4) var(--space-6);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm)}
+.logo{display:flex;align-items:center;gap:var(--space-3)}
+.logo-icon{width:36px;height:36px;flex-shrink:0}
+.logo-text{font-size:var(--text-lg);font-weight:700;letter-spacing:-.02em;color:var(--color-text)}
+.logo-sub{font-size:var(--text-xs);color:var(--color-text-muted);font-family:var(--font-mono);letter-spacing:.05em}
+.header-actions{display:flex;align-items:center;gap:var(--space-3)}
+.theme-btn{width:36px;height:36px;border-radius:var(--radius-md);background:var(--color-surface-offset);border:1px solid var(--color-border);display:flex;align-items:center;justify-content:center;transition:background var(--transition),border-color var(--transition)}
+.theme-btn:hover{background:var(--color-border)}
+
+.main{display:grid;grid-template-columns:380px 1fr;gap:0;min-height:0}
+@media(max-width:900px){.main{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
+
+/* SIDEBAR */
+.sidebar{background:var(--color-surface);border-right:1px solid var(--color-border);padding:var(--space-6);display:flex;flex-direction:column;gap:var(--space-5);overflow-y:auto;max-height:calc(100dvh - 65px)}
+.sidebar::-webkit-scrollbar{width:4px}.sidebar::-webkit-scrollbar-track{background:transparent}.sidebar::-webkit-scrollbar-thumb{background:var(--color-border);border-radius:4px}
+
+.section-title{font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-faint);margin-bottom:var(--space-3)}
+
+/* DROP ZONE */
+.drop-zone{border:2px dashed var(--color-border);border-radius:var(--radius-lg);padding:var(--space-8) var(--space-4);text-align:center;cursor:pointer;transition:border-color var(--transition),background var(--transition);position:relative}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--color-primary);background:var(--color-primary-highlight)}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:1}
+.drop-icon{width:40px;height:40px;margin:0 auto var(--space-3);color:var(--color-text-faint)}
+.drop-title{font-size:var(--text-sm);font-weight:600;color:var(--color-text);margin-bottom:var(--space-1)}
+.drop-sub{font-size:var(--text-xs);color:var(--color-text-muted)}
+
+/* PDF PREVIEW */
+.pdf-info{background:var(--color-surface-offset);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);display:flex;align-items:center;gap:var(--space-3);font-size:var(--text-xs)}
+.pdf-info-icon{width:28px;height:28px;flex-shrink:0;color:var(--color-error)}
+.pdf-info-name{font-weight:600;color:var(--color-text);font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pdf-info-meta{color:var(--color-text-muted)}
+.btn-remove{margin-left:auto;color:var(--color-text-faint);padding:var(--space-1);border-radius:var(--radius-sm);transition:color var(--transition)}
+.btn-remove:hover{color:var(--color-error)}
+
+/* SEARCH */
+.search-box{position:relative}
+.search-box input{width:100%;background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4) var(--space-3) var(--space-10);font-size:var(--text-sm);transition:border-color var(--transition),box-shadow var(--transition);color:var(--color-text)}
+.search-box input::placeholder{color:var(--color-text-faint)}
+.search-box input:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px color-mix(in oklch,var(--color-primary) 20%,transparent)}
+.search-icon{position:absolute;left:var(--space-3);top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--color-text-faint);pointer-events:none}
+.search-clear{position:absolute;right:var(--space-3);top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--color-text-faint);cursor:pointer;display:none}
+.search-clear.show{display:block}
+.search-clear:hover{color:var(--color-text)}
+
+/* CONSOLES */
+.console-filter{display:flex;gap:var(--space-2);flex-wrap:wrap}
+.console-chip{padding:var(--space-1) var(--space-3);border-radius:var(--radius-full,999px);font-size:var(--text-xs);font-weight:600;font-family:var(--font-mono);border:1.5px solid;cursor:pointer;transition:all var(--transition);user-select:none}
+.console-chip[data-console="ma2"]{border-color:var(--color-accent-ma2);color:var(--color-accent-ma2)}
+.console-chip[data-console="ma2"].active{background:var(--color-accent-ma2);color:#000}
+.console-chip[data-console="ma3"]{border-color:var(--color-accent-ma3);color:var(--color-accent-ma3)}
+.console-chip[data-console="ma3"].active{background:var(--color-accent-ma3);color:#000}
+.console-chip[data-console="avo"]{border-color:var(--color-accent-avo);color:var(--color-accent-avo)}
+.console-chip[data-console="avo"].active{background:var(--color-accent-avo);color:#fff}
+.console-chip[data-console="gdtf"]{border-color:var(--color-accent-gdtf);color:var(--color-accent-gdtf)}
+.console-chip[data-console="gdtf"].active{background:var(--color-accent-gdtf);color:#fff}
+
+/* FIXTURE LIST */
+.fixture-list{display:flex;flex-direction:column;gap:var(--space-2);max-height:300px;overflow-y:auto}
+.fixture-list::-webkit-scrollbar{width:3px}.fixture-list::-webkit-scrollbar-thumb{background:var(--color-border);border-radius:3px}
+.fixture-tag{display:flex;align-items:center;gap:var(--space-2);background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);font-size:var(--text-xs);cursor:pointer;transition:all var(--transition)}
+.fixture-tag:hover,.fixture-tag.active{border-color:var(--color-primary);background:var(--color-primary-highlight);color:var(--color-primary)}
+.fixture-tag-name{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fixture-tag-mfr{color:var(--color-text-faint);font-family:var(--font-mono)}
+.fixture-tag-badge{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:999px;padding:1px 8px;font-size:10px;font-weight:600;color:var(--color-text-muted);white-space:nowrap}
+
+.btn-analyze{width:100%;background:var(--color-primary);color:#fff;border:none;border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);font-size:var(--text-sm);font-weight:600;display:flex;align-items:center;justify-content:center;gap:var(--space-2);transition:background var(--transition),transform var(--transition),box-shadow var(--transition)}
+.btn-analyze:hover{background:var(--color-primary-hover);box-shadow:0 4px 16px color-mix(in oklch,var(--color-primary) 40%,transparent)}
+.btn-analyze:active{transform:scale(.98)}
+.btn-analyze:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.spin{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* CONTENT AREA */
+.content{padding:var(--space-6);overflow-y:auto;max-height:calc(100dvh - 65px);display:flex;flex-direction:column;gap:var(--space-6)}
+.content::-webkit-scrollbar{width:4px}.content::-webkit-scrollbar-thumb{background:var(--color-border);border-radius:4px}
+
+/* WELCOME */
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:400px;gap:var(--space-4)}
+.welcome-icon{width:64px;height:64px;color:var(--color-text-faint);margin-bottom:var(--space-2)}
+.welcome h2{font-size:var(--text-xl);font-weight:700;color:var(--color-text)}
+.welcome p{font-size:var(--text-sm);color:var(--color-text-muted);max-width:40ch}
+.workflow-steps{display:flex;gap:var(--space-4);margin-top:var(--space-4);flex-wrap:wrap;justify-content:center}
+.workflow-step{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-4);min-width:140px;text-align:center}
+.workflow-step-num{width:28px;height:28px;border-radius:50%;background:var(--color-primary-highlight);color:var(--color-primary);font-size:var(--text-xs);font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto var(--space-2)}
+.workflow-step-label{font-size:var(--text-xs);color:var(--color-text-muted);font-weight:500}
+
+/* RESULTS HEADER */
+.results-header{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4)}
+.results-title{font-size:var(--text-lg);font-weight:700}
+.results-count{font-size:var(--text-xs);color:var(--color-text-muted);background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:999px;padding:2px 10px;font-family:var(--font-mono);font-weight:600}
+
+/* FIXTURE CARDS GRID */
+.fixtures-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr));gap:var(--space-4)}
+
+/* FIXTURE CARD */
+.fixture-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color var(--transition),box-shadow var(--transition)}
+.fixture-card:hover{border-color:var(--color-primary);box-shadow:var(--shadow-md)}
+.fixture-card-head{padding:var(--space-4);border-bottom:1px solid var(--color-divider);display:flex;align-items:flex-start;gap:var(--space-3)}
+.fixture-card-icon{width:40px;height:40px;flex-shrink:0;border-radius:var(--radius-md);background:var(--color-surface-offset);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted)}
+.fixture-card-name{font-weight:700;font-size:var(--text-sm);line-height:1.3;color:var(--color-text)}
+.fixture-card-mfr{font-size:var(--text-xs);color:var(--color-text-muted);font-family:var(--font-mono);margin-top:2px}
+.fixture-card-source{margin-left:auto;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.src-pdf{background:color-mix(in oklch,var(--color-primary) 15%,transparent);color:var(--color-primary);border:1px solid color-mix(in oklch,var(--color-primary) 30%,transparent)}
+.src-manual{background:color-mix(in oklch,var(--color-success) 15%,transparent);color:var(--color-success);border:1px solid color-mix(in oklch,var(--color-success) 30%,transparent)}
+
+.fixture-card-links{padding:var(--space-3) var(--space-4);display:flex;flex-direction:column;gap:var(--space-2)}
+.lib-link{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);border:1px solid var(--color-border);font-size:var(--text-xs);font-weight:600;font-family:var(--font-mono);text-decoration:none;transition:all var(--transition);color:inherit}
+.lib-link:hover{box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.lib-link.ma2{border-color:color-mix(in oklch,var(--color-accent-ma2) 40%,transparent);background:color-mix(in oklch,var(--color-accent-ma2) 8%,transparent);color:var(--color-accent-ma2)}
+.lib-link.ma2:hover{background:color-mix(in oklch,var(--color-accent-ma2) 18%,transparent)}
+.lib-link.ma3{border-color:color-mix(in oklch,var(--color-accent-ma3) 40%,transparent);background:color-mix(in oklch,var(--color-accent-ma3) 8%,transparent);color:var(--color-accent-ma3)}
+.lib-link.ma3:hover{background:color-mix(in oklch,var(--color-accent-ma3) 18%,transparent)}
+.lib-link.avo{border-color:color-mix(in oklch,var(--color-accent-avo) 40%,transparent);background:color-mix(in oklch,var(--color-accent-avo) 8%,transparent);color:var(--color-accent-avo)}
+.lib-link.avo:hover{background:color-mix(in oklch,var(--color-accent-avo) 18%,transparent)}
+.lib-link.gdtf{border-color:color-mix(in oklch,var(--color-accent-gdtf) 40%,transparent);background:color-mix(in oklch,var(--color-accent-gdtf) 8%,transparent);color:var(--color-accent-gdtf)}
+.lib-link.gdtf:hover{background:color-mix(in oklch,var(--color-accent-gdtf) 18%,transparent)}
+.lib-link-dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+.lib-link-label{flex:1}
+.lib-link-icon{opacity:.7;flex-shrink:0}
+.lib-link-note{font-size:9px;opacity:.7;text-transform:none;letter-spacing:0}
+
+/* TOAST */
+.toast-container{position:fixed;bottom:var(--space-6);right:var(--space-6);display:flex;flex-direction:column;gap:var(--space-2);z-index:999;pointer-events:none}
+.toast{background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3) var(--space-4);font-size:var(--text-xs);font-weight:500;box-shadow:var(--shadow-lg);opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:auto;max-width:320px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.success{border-color:var(--color-success);color:var(--color-success)}
+.toast.info{border-color:var(--color-primary);color:var(--color-primary)}
+.toast.warning{border-color:var(--color-warning);color:var(--color-warning)}
+
+/* PROGRESS */
+.progress-bar{height:3px;background:var(--color-border);border-radius:999px;overflow:hidden;margin-top:var(--space-2)}
+.progress-fill{height:100%;background:var(--color-primary);border-radius:999px;transition:width .4s ease;width:0}
+
+/* PDF CANVAS */
+.pdf-preview-section{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden}
+.pdf-preview-header{padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;gap:var(--space-3)}
+.pdf-preview-title{font-size:var(--text-xs);font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.08em}
+.pdf-page-controls{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);font-family:var(--font-mono)}
+.pdf-page-btn{width:28px;height:28px;border-radius:var(--radius-sm);background:var(--color-surface-offset);border:1px solid var(--color-border);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all var(--transition)}
+.pdf-page-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
+.pdf-page-btn:disabled{opacity:.4;cursor:not-allowed}
+.pdf-canvas-wrap{overflow:auto;background:var(--color-surface-2);max-height:400px;display:flex;justify-content:center;padding:var(--space-4)}
+.pdf-canvas-wrap::-webkit-scrollbar{width:6px;height:6px}.pdf-canvas-wrap::-webkit-scrollbar-thumb{background:var(--color-border);border-radius:4px}
+#pdfCanvas{border-radius:var(--radius-sm);box-shadow:var(--shadow-md);max-width:100%}
+
+/* EMPTY */
+.empty-results{text-align:center;padding:var(--space-12) var(--space-8);color:var(--color-text-muted)}
+.empty-results svg{margin:0 auto var(--space-4);opacity:.3}
+.empty-results h3{font-size:var(--text-base);font-weight:600;color:var(--color-text);margin-bottom:var(--space-2)}
+
+/* MANUAL ADD */
+.manual-add{display:flex;gap:var(--space-2)}
+.manual-add input{flex:1;background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);font-size:var(--text-xs);color:var(--color-text)}
+.manual-add input:focus{outline:none;border-color:var(--color-primary)}
+.btn-add{background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);font-size:var(--text-xs);font-weight:600;display:flex;align-items:center;gap:var(--space-1);transition:all var(--transition)}
+.btn-add:hover{border-color:var(--color-primary);color:var(--color-primary)}
+
+/* HIGHLIGHT */
+mark{background:color-mix(in oklch,var(--color-warning) 25%,transparent);color:var(--color-warning);border-radius:2px;padding:0 2px}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .header{padding:var(--space-3) var(--space-4)}
+  .sidebar,.content{padding:var(--space-4)}
+  .workflow-steps{flex-direction:column;align-items:center}
+}
 </style>
 </head>
 <body>
-<div class="box">
-  <h1>Fixture Library Finder</h1>
-  <p>La aplicacion completa estara disponible en GitHub Pages.</p>
-  <p>Activa GitHub Pages en <a href="https://github.com/zzever/fixture-finder/settings/pages" target="_blank">Settings &rarr; Pages</a></p>
+<div class="app">
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Fixture Library Finder logo">
+      <rect width="36" height="36" rx="8" fill="url(#lg1)"/>
+      <defs><linearGradient id="lg1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse"><stop stop-color="#4a9eff"/><stop offset="1" stop-color="#9b59b6"/></linearGradient></defs>
+      <circle cx="18" cy="14" r="5" stroke="#fff" stroke-width="2"/>
+      <path d="M18 19v4M13 28h10M10 9l2.5 2.5M26 9l-2.5 2.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M6 26l3-4h18l3 4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <div class="logo-text">Fixture Finder</div>
+      <div class="logo-sub">MA2 · MA3 · AVOLITES · GDTF</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="theme-btn" data-theme-toggle aria-label="Cambiar tema">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="main">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <div class="section-title">📄 Plano / PDF</div>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="pdfInput" accept=".pdf" aria-label="Subir PDF de plano">
+        <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+        <div class="drop-title">Arrastra tu plano PDF</div>
+        <div class="drop-sub">Capture, WYSIWYG, Vectorworks…</div>
+      </div>
+    </div>
+
+    <div id="pdfInfoWrap" style="display:none">
+      <div class="pdf-info" id="pdfInfo">
+        <svg class="pdf-info-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <div>
+          <div class="pdf-info-name" id="pdfName">—</div>
+          <div class="pdf-info-meta" id="pdfMeta">—</div>
+        </div>
+        <button class="btn-remove" id="btnRemovePdf" aria-label="Eliminar PDF">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="progress-bar" id="progressBar" style="display:none"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div>
+      <button class="btn-analyze" id="btnAnalyze" disabled>
+        <svg id="analyzeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Analizar leyenda del plano
+      </button>
+    </div>
+
+    <div>
+      <div class="section-title">🔍 Búsqueda manual</div>
+      <div class="search-box" style="margin-bottom:var(--space-3)">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Ej: Sharpy, Mac Aura, MegaPointe…">
+        <svg class="search-clear" id="searchClear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+      <div class="manual-add">
+        <input type="text" id="manualInput" placeholder="Añadir fixture manualmente…">
+        <button class="btn-add" id="btnManualAdd">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Añadir
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">🎛 Consolas</div>
+      <div class="console-filter">
+        <div class="console-chip active" data-console="ma2">grandMA2</div>
+        <div class="console-chip active" data-console="ma3">grandMA3</div>
+        <div class="console-chip active" data-console="avo">Avolites</div>
+        <div class="console-chip active" data-console="gdtf">GDTF</div>
+      </div>
+    </div>
+
+    <div id="detectedFixturesSection" style="display:none">
+      <div class="section-title" style="margin-bottom:var(--space-2)">📋 Fixtures detectados <span id="detectedCount" style="color:var(--color-primary);font-family:var(--font-mono)"></span></div>
+      <div class="fixture-list" id="fixtureList"></div>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content" id="contentArea">
+    <div class="welcome" id="welcomeScreen">
+      <svg class="welcome-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="32" cy="26" r="10"/>
+        <path d="M32 36v8M22 52h20M16 18l5 5M48 18l-5 5"/>
+        <path d="M8 52l6-8h36l6 8"/>
+      </svg>
+      <h2>Fixture Library Finder</h2>
+      <p>Sube un plano de iluminación en PDF o busca fixtures manualmente para obtener enlaces directos a las librerías.</p>
+      <div class="workflow-steps">
+        <div class="workflow-step">
+          <div class="workflow-step-num">1</div>
+          <div class="workflow-step-label">Sube el plano PDF (Capture, WYSIWYG…)</div>
+        </div>
+        <div class="workflow-step">
+          <div class="workflow-step-num">2</div>
+          <div class="workflow-step-label">Analiza la leyenda automáticamente</div>
+        </div>
+        <div class="workflow-step">
+          <div class="workflow-step-num">3</div>
+          <div class="workflow-step-label">Descarga librerías MA2/MA3/Avo</div>
+        </div>
+      </div>
+    </div>
+    <div id="resultsScreen" style="display:none"></div>
+  </main>
 </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ============================================================
+// PDF.js setup
+// ============================================================
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ============================================================
+// STATE
+// ============================================================
+let pdfDoc = null;
+let currentPage = 1;
+let totalPages = 0;
+let pdfFile = null;
+let detectedFixtures = []; // {name, manufacturer, source}
+let manualFixtures = [];
+let activeConsoles = new Set(['ma2','ma3','avo','gdtf']);
+let searchQuery = '';
+
+// ============================================================
+// KNOWN FIXTURE DATABASE (manufacturer + fixture combos)
+// ============================================================
+const FIXTURE_DB = [
+  // Clay Paky
+  {mfr:'Clay Paky', names:['Sharpy','A.leda B-EYE K10','K20','Alpha Spot QWO','Mythos','Alpha Beam','Stormy','Axcor Profile','Axcor Beam','Axcor Wash','Rhapsody','A.leda Wash','Xtylos']},
+  // Robe
+  {mfr:'Robe', names:['Robin 600E','Robin 600 Beam','MegaPointe','Pointe','BMFL','Spiider','Tarrantula','LEDBeam','LEDWash','ESPRITE','Forte','RoboSpot','Robin 300E','Tetra','T11','T2 Profile','Cycbar','Robin MMX']},
+  // Martin
+  {mfr:'Martin', names:['Mac Aura','Mac Ultra','Mac Viper','Mac Encore','Mac Quantum','Mac Axiom','Mac 101','Mac 350','Mac Allure','Mac Minette','MAC III','Atomic 3000','Rush MH','Exterior 600']},
+  // Chauvet
+  {mfr:'Chauvet', names:['Maverick MK1','Maverick MK2','Maverick MK3','Rogue','Ovation','Intimidator','Colorado','Nexus','Strike','Maverick Storm']},
+  // ETC
+  {mfr:'ETC', names:['Source Four','Source Four LED','Desire','ColorSource','CYC','ColorSource Linear','Lustr','Titan','Selador']},
+  // Ayrton
+  {mfr:'Ayrton', names:['MagicBlade','MagicDot','MagicPanel','MagicBeam','NandoBeam','Perseo','Ghibli','Mistral','Cobra','Diablo','Domino']},
+  // SGM
+  {mfr:'SGM', names:['G-7 Beam','G-7 Wash','G-7 Profile','X-5','P-5','Q-7','P-2','P-6']},
+  // Vari-Lite
+  {mfr:'Vari-Lite', names:['VL3000','VL2600','VL4000','VL2500','VL6C','VL800','VL10','VL2','VL4']},
+  // GLP
+  {mfr:'GLP', names:['impression X4','impression X5','impression FR10','JDC1','JDC Line','KNV','Fusion','X4 Bar','X4 S']},
+  // Elation
+  {mfr:'Elation', names:['Artiste','Fuze','Smarty','Proteus','SixPar','Artiste Monet','Artiste Picasso','Fuze Max']},
+  // Cameo
+  {mfr:'Cameo', names:['ZENIT B200','Movo Beam Z100','Auro Spot Z300','Evos W7','ZENIT W600']},
+  // Showtec
+  {mfr:'Showtec', names:['Phantom 120','Phantom 75','Phantom 65']},
+  // Robert Juliat
+  {mfr:'Robert Juliat', names:['Korrigan','Oz','Oz S','Dalis','Aledin']},
+  // Philips Vari-Lite
+  {mfr:'Philips', names:['PLT','PL1','Canto','Color Kinetics','iColor','ColorReach']},
+  // Astera
+  {mfr:'Astera', names:['Titan Tube','Helios Tube','AX1','AX3','Hydra']},
+  // Generic types
+  {mfr:'Generic', names:['PAR64','PAR56','PAR38','Fresnel','Ellipsoidal','Profile','Moving Head','LED Bar','Strobe','Effect','Dimmer']},
+];
+
+// Flatten for fast lookup
+const ALL_FIXTURE_NAMES = [];
+FIXTURE_DB.forEach(entry => {
+  entry.names.forEach(n => ALL_FIXTURE_NAMES.push({name:n, mfr:entry.mfr}));
+});
+
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+(function(){
+  const btn = document.querySelector('[data-theme-toggle]');
+  const root = document.documentElement;
+  let dark = true;
+  root.setAttribute('data-theme','dark');
+  btn && btn.addEventListener('click',()=>{
+    dark = !dark;
+    root.setAttribute('data-theme', dark?'dark':'light');
+    btn.innerHTML = dark
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
+      : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+  });
+})();
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg, type='info', duration=3500){
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  requestAnimationFrame(()=>{ t.classList.add('show'); });
+  setTimeout(()=>{
+    t.classList.remove('show');
+    setTimeout(()=>t.remove(), 400);
+  }, duration);
+}
+
+// ============================================================
+// PDF HANDLING
+// ============================================================
+const dropZone = document.getElementById('dropZone');
+const pdfInput = document.getElementById('pdfInput');
+const pdfInfoWrap = document.getElementById('pdfInfoWrap');
+const pdfName = document.getElementById('pdfName');
+const pdfMeta = document.getElementById('pdfMeta');
+const btnAnalyze = document.getElementById('btnAnalyze');
+const progressBar = document.getElementById('progressBar');
+const progressFill = document.getElementById('progressFill');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if(f && f.type==='application/pdf') loadPDF(f);
+  else toast('Solo se aceptan archivos PDF','warning');
+});
+pdfInput.addEventListener('change', e => {
+  if(e.target.files[0]) loadPDF(e.target.files[0]);
+});
+document.getElementById('btnRemovePdf').addEventListener('click', removePDF);
+
+async function loadPDF(file){
+  pdfFile = file;
+  pdfName.textContent = file.name;
+  pdfMeta.textContent = (file.size/1024).toFixed(0)+' KB';
+  pdfInfoWrap.style.display = '';
+  dropZone.style.display = 'none';
+  btnAnalyze.disabled = false;
+
+  const buf = await file.arrayBuffer();
+  try {
+    pdfDoc = await pdfjsLib.getDocument({data: buf}).promise;
+    totalPages = pdfDoc.numPages;
+    currentPage = 1;
+    pdfMeta.textContent = `${(file.size/1024).toFixed(0)} KB · ${totalPages} página${totalPages>1?'s':''}`;
+    showPDFPreview();
+    toast(`PDF cargado: ${totalPages} página${totalPages>1?'s':''}`, 'success');
+  } catch(e){
+    toast('Error al leer el PDF: '+e.message,'warning');
+    console.error(e);
+  }
+}
+
+function removePDF(){
+  pdfDoc = null; pdfFile = null; detectedFixtures = [];
+  pdfInput.value = '';
+  pdfInfoWrap.style.display = 'none';
+  dropZone.style.display = '';
+  btnAnalyze.disabled = true;
+  document.getElementById('detectedFixturesSection').style.display = 'none';
+  document.getElementById('fixtureList').innerHTML = '';
+  const rs = document.getElementById('resultsScreen');
+  rs.style.display = 'none';
+  document.getElementById('welcomeScreen').style.display = '';
+  toast('PDF eliminado','info');
+}
+
+// ============================================================
+// PDF PREVIEW (canvas)
+// ============================================================
+let previewSection = null;
+let pdfCanvas = null;
+
+function showPDFPreview(){
+  const content = document.getElementById('contentArea');
+  const welcome = document.getElementById('welcomeScreen');
+  welcome.style.display = 'none';
+  const rs = document.getElementById('resultsScreen');
+  rs.style.display = '';
+
+  if(!previewSection){
+    previewSection = document.createElement('div');
+    previewSection.className = 'pdf-preview-section';
+    previewSection.innerHTML = `
+      <div class="pdf-preview-header">
+        <span class="pdf-preview-title">Vista previa del plano</span>
+        <div class="pdf-page-controls">
+          <button class="pdf-page-btn" id="btnPrevPage" disabled>‹</button>
+          <span id="pageLabel">—</span>
+          <button class="pdf-page-btn" id="btnNextPage" disabled>›</button>
+        </div>
+      </div>
+      <div class="pdf-canvas-wrap">
+        <canvas id="pdfCanvas"></canvas>
+      </div>`;
+    rs.insertBefore(previewSection, rs.firstChild);
+    pdfCanvas = previewSection.querySelector('#pdfCanvas');
+    previewSection.querySelector('#btnPrevPage').addEventListener('click',()=>{if(currentPage>1){currentPage--;renderPage(currentPage);}});
+    previewSection.querySelector('#btnNextPage').addEventListener('click',()=>{if(currentPage<totalPages){currentPage++;renderPage(currentPage);}});
+  }
+  renderPage(1);
+}
+
+async function renderPage(n){
+  if(!pdfDoc) return;
+  const page = await pdfDoc.getPage(n);
+  const vp = page.getViewport({scale:1.2});
+  pdfCanvas.width = vp.width;
+  pdfCanvas.height = vp.height;
+  const ctx = pdfCanvas.getContext('2d');
+  await page.render({canvasContext:ctx, viewport:vp}).promise;
+  currentPage = n;
+  const label = previewSection.querySelector('#pageLabel');
+  label.textContent = `${n} / ${totalPages}`;
+  previewSection.querySelector('#btnPrevPage').disabled = n<=1;
+  previewSection.querySelector('#btnNextPage').disabled = n>=totalPages;
+}
+
+// ============================================================
+// PDF TEXT EXTRACTION & FIXTURE DETECTION
+// ============================================================
+btnAnalyze.addEventListener('click', analyzePDF);
+
+async function analyzePDF(){
+  if(!pdfDoc){ toast('Carga un PDF primero','warning'); return; }
+  btnAnalyze.disabled = true;
+  const icon = document.getElementById('analyzeIcon');
+  icon.classList.add('spin');
+  progressBar.style.display = '';
+  progressFill.style.width = '0%';
+
+  let allText = '';
+  for(let i=1; i<=totalPages; i++){
+    const page = await pdfDoc.getPage(i);
+    const tc = await page.getTextContent();
+    allText += tc.items.map(it=>it.str).join(' ') + '\n';
+    progressFill.style.width = ((i/totalPages)*100)+'%';
+  }
+
+  detectedFixtures = extractFixtures(allText);
+  progressBar.style.display = 'none';
+  icon.classList.remove('spin');
+  btnAnalyze.disabled = false;
+
+  if(detectedFixtures.length===0){
+    toast('No se detectaron fixtures conocidos en la leyenda. Añade manualmente.','warning');
+  } else {
+    toast(`${detectedFixtures.length} fixture${detectedFixtures.length>1?'s':''} detectado${detectedFixtures.length>1?'s':''}!`,'success');
+    renderDetectedList();
+    renderResults();
+  }
+}
+
+function extractFixtures(text){
+  const found = new Map();
+  const textUpper = text.toUpperCase();
+
+  ALL_FIXTURE_NAMES.forEach(({name, mfr})=>{
+    const nameUp = name.toUpperCase();
+    // check whole word
+    const re = new RegExp('\\b' + nameUp.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\b');
+    if(re.test(textUpper)){
+      const key = mfr+'::'+name;
+      if(!found.has(key)) found.set(key, {name, mfr, source:'pdf'});
+    }
+  });
+
+  // also try to grab lines that look like legend entries (e.g. "- Sharpy" or "1x Sharpy")
+  const lines = text.split(/[\n\r]+/);
+  lines.forEach(line=>{
+    const clean = line.trim();
+    if(clean.length < 3 || clean.length > 100) return;
+    // Try to find unknown fixture names that appear with quantity patterns
+    const qtyMatch = clean.match(/^(\d+)[\s×x*]+(.+)$/i) || clean.match(/^[-•·▪]\s*(.+)$/);
+    if(qtyMatch){
+      const candidateName = (qtyMatch[2]||qtyMatch[1]).trim().replace(/[^\w\s\-]/g,'').trim();
+      if(candidateName.length > 3 && candidateName.length < 50){
+        // check against DB
+        const hit = ALL_FIXTURE_NAMES.find(f=> candidateName.toUpperCase().includes(f.name.toUpperCase()));
+        if(hit){
+          const key = hit.mfr+'::'+hit.name;
+          if(!found.has(key)) found.set(key, {name:hit.name, mfr:hit.mfr, source:'pdf'});
+        }
+      }
+    }
+  });
+
+  return [...found.values()];
+}
+
+// ============================================================
+// MANUAL ADD
+// ============================================================
+document.getElementById('btnManualAdd').addEventListener('click', doManualAdd);
+document.getElementById('manualInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doManualAdd(); });
+
+function doManualAdd(){
+  const val = document.getElementById('manualInput').value.trim();
+  if(!val){ toast('Escribe el nombre del fixture','warning'); return; }
+  // Try to match in DB
+  const hit = ALL_FIXTURE_NAMES.find(f=> f.name.toLowerCase().includes(val.toLowerCase()) || val.toLowerCase().includes(f.name.toLowerCase()));
+  const fixture = hit ? {name:hit.name, mfr:hit.mfr, source:'manual'} : {name:val, mfr:'Unknown', source:'manual'};
+  const key = fixture.mfr+'::'+fixture.name;
+  if(detectedFixtures.find(f=>f.mfr+'::'+f.name===key)||manualFixtures.find(f=>f.mfr+'::'+f.name===key)){
+    toast('Ese fixture ya está en la lista','info'); return;
+  }
+  manualFixtures.push(fixture);
+  document.getElementById('manualInput').value = '';
+  renderDetectedList();
+  renderResults();
+  toast(`"${fixture.name}" añadido`,'success');
+}
+
+// ============================================================
+// DETECTED FIXTURE LIST (sidebar)
+// ============================================================
+function renderDetectedList(){
+  const section = document.getElementById('detectedFixturesSection');
+  const list = document.getElementById('fixtureList');
+  const all = [...detectedFixtures, ...manualFixtures];
+  if(all.length===0){ section.style.display='none'; return; }
+  section.style.display='';
+  document.getElementById('detectedCount').textContent = `(${all.length})`;
+  list.innerHTML = '';
+  all.forEach((f,i)=>{
+    const el = document.createElement('div');
+    el.className = 'fixture-tag';
+    el.dataset.idx = i;
+    el.innerHTML = `<span class="fixture-tag-name">${esc(f.name)}</span><span class="fixture-tag-mfr">${esc(f.mfr)}</span><span class="fixture-tag-badge">${f.source==='pdf'?'PDF':'Manual'}</span>`;
+    el.addEventListener('click',()=>{
+      el.classList.toggle('active');
+      const card = document.getElementById('card-'+i);
+      if(card) card.scrollIntoView({behavior:'smooth',block:'center'});
+    });
+    list.appendChild(el);
+  });
+}
+
+// ============================================================
+// CONSOLE FILTER
+// ============================================================
+document.querySelectorAll('.console-chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    const c = chip.dataset.console;
+    if(activeConsoles.has(c)){ activeConsoles.delete(c); chip.classList.remove('active'); }
+    else { activeConsoles.add(c); chip.classList.add('active'); }
+    renderResults();
+  });
+});
+
+// ============================================================
+// SEARCH
+// ============================================================
+document.getElementById('searchInput').addEventListener('input', e=>{
+  searchQuery = e.target.value.trim();
+  document.getElementById('searchClear').classList.toggle('show', searchQuery.length>0);
+  renderResults();
+});
+document.getElementById('searchClear').addEventListener('click',()=>{
+  document.getElementById('searchInput').value='';
+  searchQuery='';
+  document.getElementById('searchClear').classList.remove('show');
+  renderResults();
+});
+
+// ============================================================
+// BUILD LIBRARY LINKS
+// ============================================================
+function buildLinks(fixture){
+  const q = encodeURIComponent(fixture.name);
+  const mq = encodeURIComponent(fixture.mfr !== 'Unknown' ? fixture.mfr + ' ' + fixture.name : fixture.name);
+  return {
+    ma2:`https://www.malighting.com/training-support/fixture-shares/`,
+    ma2_search:`https://www.malighting.com/training-support/fixture-shares/#${q}`,
+    ma3:`https://gdtf-share.com/?page=gdtf&search=${q}`,
+    avo:`https://personalities.avolites.com/?mainPage=Main.asp&Search=${q}`,
+    gdtf:`https://gdtf-share.com/?page=gdtf&search=${q}`,
+    avofinder:`https://www.avofixturefinder.com/?q=${q}`,
+  };
+}
+
+// ============================================================
+// RENDER RESULTS
+// ============================================================
+function renderResults(){
+  const rs = document.getElementById('resultsScreen');
+  const welcome = document.getElementById('welcomeScreen');
+  const all = [...detectedFixtures, ...manualFixtures];
+
+  if(all.length===0 && !searchQuery){
+    welcome.style.display = ''; rs.style.display = 'none'; return;
+  }
+  welcome.style.display = 'none'; rs.style.display = '';
+
+  // keep preview if exists
+  const preview = previewSection;
+
+  let filtered = all;
+  if(searchQuery){
+    const q = searchQuery.toLowerCase();
+    filtered = all.filter(f=> f.name.toLowerCase().includes(q)||f.mfr.toLowerCase().includes(q));
+  }
+
+  // also search DB if there's a query and no matches
+  let searchResults = [];
+  if(searchQuery && filtered.length===0){
+    const q = searchQuery.toLowerCase();
+    ALL_FIXTURE_NAMES.forEach(f=>{
+      if(f.name.toLowerCase().includes(q)||f.mfr.toLowerCase().includes(q)){
+        searchResults.push({...f, source:'search'});
+      }
+    });
+    filtered = searchResults.slice(0,12);
+  }
+
+  const combined = filtered;
+
+  // Build HTML
+  let html = '';
+
+  // Header
+  html += `<div class="results-header"><div class="results-title">Librerías de fixtures</div><div class="results-count">${combined.length} resultado${combined.length!==1?'s':''}</div></div>`;
+
+  if(combined.length===0){
+    html += `<div class="empty-results">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <h3>Sin resultados</h3>
+      <p>Prueba otra búsqueda o añade el fixture manualmente.</p>
+    </div>`;
+  } else {
+    html += `<div class="fixtures-grid">`;
+    combined.forEach((f,i)=>{
+      const links = buildLinks(f);
+      const srcBadge = f.source==='pdf' ? '<span class="fixture-card-source src-pdf">PDF</span>' : f.source==='search' ? '' : '<span class="fixture-card-source src-manual">Manual</span>';
+      const hl = (s)=> searchQuery ? s.replace(new RegExp('('+searchQuery.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>') : s;
+
+      let linksHTML = '';
+      if(activeConsoles.has('ma2')){
+        linksHTML += `<a class="lib-link ma2" href="${links.ma2}" target="_blank" rel="noopener noreferrer">
+          <span class="lib-link-dot"></span>
+          <span class="lib-link-label">grandMA2 FixtureShare</span>
+          <svg class="lib-link-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>`;
+      }
+      if(activeConsoles.has('ma3')){
+        linksHTML += `<a class="lib-link ma3" href="${links.ma3}" target="_blank" rel="noopener noreferrer">
+          <span class="lib-link-dot"></span>
+          <span class="lib-link-label">grandMA3 / GDTF Share</span>
+          <svg class="lib-link-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>`;
+      }
+      if(activeConsoles.has('avo')){
+        linksHTML += `<a class="lib-link avo" href="${links.avo}" target="_blank" rel="noopener noreferrer">
+          <span class="lib-link-dot"></span>
+          <span class="lib-link-label">Avolites Personality Library</span>
+          <svg class="lib-link-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>`;
+        linksHTML += `<a class="lib-link avo" href="${links.avofinder}" target="_blank" rel="noopener noreferrer">
+          <span class="lib-link-dot"></span>
+          <span class="lib-link-label">AvoFixtureFinder <span class="lib-link-note">(búsqueda avanzada por canal)</span></span>
+          <svg class="lib-link-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>`;
+      }
+      if(activeConsoles.has('gdtf')){
+        linksHTML += `<a class="lib-link gdtf" href="${links.gdtf}" target="_blank" rel="noopener noreferrer">
+          <span class="lib-link-dot"></span>
+          <span class="lib-link-label">GDTF Share (universal)</span>
+          <svg class="lib-link-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>`;
+      }
+
+      html += `<div class="fixture-card" id="card-${i}">
+        <div class="fixture-card-head">
+          <div class="fixture-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="10" r="4"/><path d="M12 14v5M8 22h8M6 7l2 2M18 7l-2 2"/></svg>
+          </div>
+          <div>
+            <div class="fixture-card-name">${hl(esc(f.name))}</div>
+            <div class="fixture-card-mfr">${hl(esc(f.mfr))}</div>
+          </div>
+          ${srcBadge}
+        </div>
+        <div class="fixture-card-links">${linksHTML||'<span style="font-size:var(--text-xs);color:var(--color-text-faint);padding:var(--space-1)">Selecciona al menos una consola</span>'}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Inject
+  // Keep preview at top
+  if(preview && preview.parentNode===rs){
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    // clear non-preview nodes
+    [...rs.children].forEach(c=>{ if(c!==preview) c.remove(); });
+    [...tmp.children].forEach(c=> rs.appendChild(c));
+  } else {
+    rs.innerHTML = html;
+    if(preview) rs.insertBefore(preview, rs.firstChild);
+  }
+}
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// init search from start (show DB browse)
+document.getElementById('searchInput').addEventListener('focus',()=>{
+  if(!searchQuery && detectedFixtures.length===0 && manualFixtures.length===0){
+    // show welcome hints
+  }
+});
+</script>
 </body>
 </html>
