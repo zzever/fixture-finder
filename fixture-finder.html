@@ -10,30 +10,30 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 :root,[data-theme="dark"]{
-  --bg:#0d0e11;--sur:#13151a;--sur2:#181b22;--suroff:#1e2230;
-  --brd:#2a2f3e;--div:#1f2435;--txt:#e2e6f0;--muted:#8a93aa;--faint:#4a5168;
-  --pri:#4a9eff;--prih:#6eb3ff;--pria:#2a7ee8;--prihlt:#0d2040;
-  --ma2:#f5a623;--ma3:#00d4ff;--avo:#e84040;--gdtf:#9b59b6;
-  --ok:#3ddc84;--warn:#f5a623;--err:#e84040;
-  --r1:4px;--r2:8px;--r3:12px;--r4:16px;
-  --sh1:0 1px 3px rgba(0,0,0,.4);--sh2:0 4px 16px rgba(0,0,0,.5);--sh3:0 12px 40px rgba(0,0,0,.6);
-  --fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;
-  --tx:clamp(.75rem,.7rem+.25vw,.875rem);
-  --ts:clamp(.8rem,.75rem+.25vw,.9rem);
-  --tb:clamp(.9rem,.85rem+.25vw,1rem);
-  --tl:clamp(1rem,.9rem+.5vw,1.25rem);
-  --txl:clamp(1.2rem,1rem+1vw,1.6rem);
-  --tr:180ms cubic-bezier(.16,1,.3,1);
+--bg:#0d0e11;--sur:#13151a;--sur2:#181b22;--suroff:#1e2230;
+--brd:#2a2f3e;--div:#1f2435;--txt:#e2e6f0;--muted:#8a93aa;--faint:#4a5168;
+--pri:#4a9eff;--prih:#6eb3ff;--prihlt:#0d2040;
+--ma2:#f5a623;--ma3:#00d4ff;--avo:#e84040;--gdtf:#9b59b6;
+--ok:#3ddc84;--warn:#f5a623;--err:#e84040;
+--r2:8px;--r3:12px;
+--sh1:0 1px 3px rgba(0,0,0,.4);--sh2:0 4px 16px rgba(0,0,0,.5);--sh3:0 12px 40px rgba(0,0,0,.6);
+--fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;
+--tx:clamp(.75rem,.7rem+.25vw,.875rem);
+--ts:clamp(.8rem,.75rem+.25vw,.9rem);
+--tb:clamp(.9rem,.85rem+.25vw,1rem);
+--tl:clamp(1rem,.9rem+.5vw,1.25rem);
+--txl:clamp(1.2rem,1rem+1vw,1.6rem);
+--tr:180ms cubic-bezier(.16,1,.3,1);
 }
 [data-theme="light"]{
-  --bg:#f4f5f8;--sur:#fff;--sur2:#f9fafb;--suroff:#eef0f5;
-  --brd:#d8dce8;--div:#e4e7f0;--txt:#1a1d2e;--muted:#5a6180;--faint:#a0a8c0;
-  --pri:#1a6fd4;--prih:#0d5abf;--pria:#0a4aa8;--prihlt:#ddeeff;
-  --ma2:#b07010;--ma3:#006080;--avo:#b02020;--gdtf:#7b3f9e;
-  --sh1:0 1px 3px rgba(0,0,0,.1);--sh2:0 4px 16px rgba(0,0,0,.12);--sh3:0 12px 40px rgba(0,0,0,.15);
+--bg:#f4f5f8;--sur:#fff;--sur2:#f9fafb;--suroff:#eef0f5;
+--brd:#d8dce8;--div:#e4e7f0;--txt:#1a1d2e;--muted:#5a6180;--faint:#a0a8c0;
+--pri:#1a6fd4;--prih:#0d5abf;--prihlt:#ddeeff;
+--ma2:#b07010;--ma3:#006080;--avo:#b02020;--gdtf:#7b3f9e;
+--sh1:0 1px 3px rgba(0,0,0,.1);--sh2:0 4px 16px rgba(0,0,0,.12);--sh3:0 12px 40px rgba(0,0,0,.15);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scroll-behavior:smooth}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
 body{font-family:var(--fb);font-size:var(--tb);color:var(--txt);background:var(--bg);min-height:100dvh;line-height:1.6}
 button,input{font:inherit;color:inherit}
 button{background:none;border:none;cursor:pointer}
@@ -47,7 +47,7 @@ input{cursor:text}
 .thmbtn{width:36px;height:36px;border-radius:var(--r2);background:var(--suroff);border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;transition:background var(--tr)}
 .thmbtn:hover{background:var(--brd)}
 .main{display:grid;grid-template-columns:370px 1fr;min-height:0}
-@media(max-width:860px){.main{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
+@media(max-width:860px){.main{grid-template-columns:1fr}}
 .side{background:var(--sur);border-right:1px solid var(--brd);padding:1.5rem;display:flex;flex-direction:column;gap:1.25rem;overflow-y:auto;max-height:calc(100dvh - 61px)}
 .side::-webkit-scrollbar{width:3px}.side::-webkit-scrollbar-thumb{background:var(--brd);border-radius:3px}
 .sttl{font-size:var(--tx);font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin-bottom:.5rem}
@@ -58,20 +58,19 @@ input{cursor:text}
 .dz-t{font-size:var(--ts);font-weight:600;margin-bottom:.25rem}
 .dz-s{font-size:var(--tx);color:var(--muted)}
 .pinfo{background:var(--suroff);border-radius:var(--r2);padding:.6rem 1rem;display:flex;align-items:center;gap:.75rem;font-size:var(--tx)}
-.pinfo-ico{width:24px;height:24px;flex-shrink:0;color:var(--err)}
 .pinfo-n{font-weight:600;font-family:var(--fm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pinfo-m{color:var(--muted)}
-.rmv{margin-left:auto;color:var(--faint);padding:2px;border-radius:var(--r1);transition:color var(--tr)}
+.rmv{margin-left:auto;color:var(--faint);padding:2px;border-radius:4px;transition:color var(--tr)}
 .rmv:hover{color:var(--err)}
 .pbar{height:3px;background:var(--brd);border-radius:999px;overflow:hidden;margin-top:.5rem}
 .pbar-f{height:100%;background:var(--pri);border-radius:999px;transition:width .3s ease;width:0}
 .sbx{position:relative}
-.sbx input{width:100%;background:var(--suroff);border:1px solid var(--brd);border-radius:var(--r2);padding:.6rem 1rem .6rem 2.5rem;font-size:var(--ts);transition:border-color var(--tr),box-shadow var(--tr);color:var(--txt)}
+.sbx input{width:100%;background:var(--suroff);border:1px solid var(--brd);border-radius:var(--r2);padding:.6rem 1rem .6rem 2.5rem;font-size:var(--ts);transition:border-color var(--tr);color:var(--txt)}
 .sbx input::placeholder{color:var(--faint)}
-.sbx input:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px color-mix(in oklch,var(--pri) 20%,transparent)}
+.sbx input:focus{outline:none;border-color:var(--pri)}
 .sbx-ico{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--faint);pointer-events:none}
 .sbx-clr{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--faint);cursor:pointer;display:none}
-.sbx-clr.on{display:block}.sbx-clr:hover{color:var(--txt)}
+.sbx-clr.on{display:block}
 .man-add{display:flex;gap:.5rem;margin-top:.5rem}
 .man-add input{flex:1;background:var(--suroff);border:1px solid var(--brd);border-radius:var(--r2);padding:.5rem .75rem;font-size:var(--tx);color:var(--txt)}
 .man-add input:focus{outline:none;border-color:var(--pri)}
@@ -90,10 +89,9 @@ input{cursor:text}
 .fxtag-n{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fxtag-m{color:var(--faint);font-family:var(--fm);font-size:10px}
 .fxtag-b{background:var(--sur2);border:1px solid var(--brd);border-radius:999px;padding:1px 8px;font-size:10px;font-weight:600;color:var(--muted);white-space:nowrap}
-.btnana{width:100%;background:var(--pri);color:#fff;border:none;border-radius:var(--r2);padding:.75rem 1rem;font-size:var(--ts);font-weight:600;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:background var(--tr),transform var(--tr),box-shadow var(--tr)}
-.btnana:hover{background:var(--prih);box-shadow:0 4px 16px color-mix(in oklch,var(--pri) 40%,transparent)}
-.btnana:active{transform:scale(.98)}
-.btnana:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btnana{width:100%;background:var(--pri);color:#fff;border:none;border-radius:var(--r2);padding:.75rem 1rem;font-size:var(--ts);font-weight:600;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:background var(--tr)}
+.btnana:hover{background:var(--prih)}
+.btnana:disabled{opacity:.5;cursor:not-allowed}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{animation:spin .7s linear infinite}
 .con{padding:1.5rem;overflow-y:auto;max-height:calc(100dvh - 61px);display:flex;flex-direction:column;gap:1.5rem}
@@ -117,19 +115,14 @@ input{cursor:text}
 .card-n{font-weight:700;font-size:var(--ts);line-height:1.3}
 .card-m{font-size:var(--tx);color:var(--muted);font-family:var(--fm);margin-top:2px}
 .card-src{margin-left:auto;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:999px;white-space:nowrap}
-.src-p{background:color-mix(in oklch,var(--pri) 15%,transparent);color:var(--pri);border:1px solid color-mix(in oklch,var(--pri) 30%,transparent)}
-.src-m{background:color-mix(in oklch,var(--ok) 15%,transparent);color:var(--ok);border:1px solid color-mix(in oklch,var(--ok) 30%,transparent)}
+.src-p{background:rgba(74,158,255,.15);color:var(--pri);border:1px solid rgba(74,158,255,.3)}
+.src-m{background:rgba(61,220,132,.15);color:var(--ok);border:1px solid rgba(61,220,132,.3)}
 .card-l{padding:.75rem 1rem;display:flex;flex-direction:column;gap:.4rem}
 .lnk{display:flex;align-items:center;gap:.5rem;padding:.4rem .75rem;border-radius:var(--r2);border:1px solid var(--brd);font-size:var(--tx);font-weight:600;font-family:var(--fm);text-decoration:none;transition:all var(--tr);color:inherit}
-.lnk:hover{box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.lnk.ma2{border-color:color-mix(in oklch,var(--ma2) 40%,transparent);background:color-mix(in oklch,var(--ma2) 8%,transparent);color:var(--ma2)}
-.lnk.ma2:hover{background:color-mix(in oklch,var(--ma2) 18%,transparent)}
-.lnk.ma3{border-color:color-mix(in oklch,var(--ma3) 40%,transparent);background:color-mix(in oklch,var(--ma3) 8%,transparent);color:var(--ma3)}
-.lnk.ma3:hover{background:color-mix(in oklch,var(--ma3) 18%,transparent)}
-.lnk.avo{border-color:color-mix(in oklch,var(--avo) 40%,transparent);background:color-mix(in oklch,var(--avo) 8%,transparent);color:var(--avo)}
-.lnk.avo:hover{background:color-mix(in oklch,var(--avo) 18%,transparent)}
-.lnk.gdtf{border-color:color-mix(in oklch,var(--gdtf) 40%,transparent);background:color-mix(in oklch,var(--gdtf) 8%,transparent);color:var(--gdtf)}
-.lnk.gdtf:hover{background:color-mix(in oklch,var(--gdtf) 18%,transparent)}
+.lnk.ma2{border-color:rgba(245,166,35,.4);background:rgba(245,166,35,.08);color:var(--ma2)}
+.lnk.ma3{border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.08);color:var(--ma3)}
+.lnk.avo{border-color:rgba(232,64,64,.4);background:rgba(232,64,64,.08);color:var(--avo)}
+.lnk.gdtf{border-color:rgba(155,89,182,.4);background:rgba(155,89,182,.08);color:var(--gdtf)}
 .lnk-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
 .lnk-lbl{flex:1}
 .lnk-note{font-size:9px;opacity:.7;text-transform:none;letter-spacing:0}
@@ -138,12 +131,11 @@ input{cursor:text}
 .pdf-prev-h{padding:.6rem 1rem;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;gap:.75rem}
 .pdf-prev-t{font-size:var(--tx);font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .pdf-pctl{display:flex;align-items:center;gap:.5rem;font-size:var(--tx);font-family:var(--fm)}
-.pdf-pbtn{width:26px;height:26px;border-radius:var(--r1);background:var(--suroff);border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all var(--tr)}
+.pdf-pbtn{width:26px;height:26px;border-radius:4px;background:var(--suroff);border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all var(--tr)}
 .pdf-pbtn:hover{border-color:var(--pri);color:var(--pri)}
 .pdf-pbtn:disabled{opacity:.4;cursor:not-allowed}
 .pdf-cvw{overflow:auto;background:var(--sur2);max-height:380px;display:flex;justify-content:center;padding:1rem}
-.pdf-cvw::-webkit-scrollbar{width:5px;height:5px}.pdf-cvw::-webkit-scrollbar-thumb{background:var(--brd);border-radius:4px}
-#cvs{border-radius:var(--r1);box-shadow:var(--sh2);max-width:100%}
+#cvs{border-radius:4px;box-shadow:var(--sh2);max-width:100%}
 .empty{text-align:center;padding:3rem 2rem;color:var(--muted)}
 .empty svg{margin:0 auto 1rem;opacity:.3}
 .empty h3{font-size:var(--tb);font-weight:600;color:var(--txt);margin-bottom:.5rem}
@@ -153,14 +145,14 @@ input{cursor:text}
 .toast.ok{border-color:var(--ok);color:var(--ok)}
 .toast.nfo{border-color:var(--pri);color:var(--pri)}
 .toast.wrn{border-color:var(--warn);color:var(--warn)}
-mark{background:color-mix(in oklch,var(--warn) 25%,transparent);color:var(--warn);border-radius:2px;padding:0 2px}
+mark{background:rgba(245,166,35,.25);color:var(--warn);border-radius:2px;padding:0 2px}
 </style>
 </head>
 <body>
 <div class="app">
 <header class="hdr">
   <div class="logo">
-    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Fixture Finder logo">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="36" height="36" rx="8" fill="url(#g1)"/>
       <defs><linearGradient id="g1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse"><stop stop-color="#4a9eff"/><stop offset="1" stop-color="#9b59b6"/></linearGradient></defs>
       <circle cx="18" cy="13" r="5" stroke="#fff" stroke-width="2"/>
@@ -175,56 +167,51 @@ mark{background:color-mix(in oklch,var(--warn) 25%,transparent);color:var(--warn
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
   </button>
 </header>
-
 <div class="main">
   <aside class="side">
     <div>
-      <div class="sttl">&#128196; Plano PDF</div>
+      <div class="sttl">Plano PDF</div>
       <div class="dz" id="dz">
-        <input type="file" id="fi" accept=".pdf" aria-label="Subir PDF">
+        <input type="file" id="fi" accept=".pdf">
         <svg class="dz-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
         <div class="dz-t">Arrastra el plano PDF</div>
         <div class="dz-s">Capture &middot; WYSIWYG &middot; Vectorworks&hellip;</div>
       </div>
     </div>
-
     <div id="pinfoWrap" style="display:none">
       <div class="pinfo">
-        <svg class="pinfo-ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
         <div style="flex:1;min-width:0">
           <div class="pinfo-n" id="pn">&mdash;</div>
           <div class="pinfo-m" id="pm">&mdash;</div>
         </div>
-        <button class="rmv" id="rmv" aria-label="Eliminar PDF">
+        <button class="rmv" id="rmv">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div class="pbar" id="pbar" style="display:none"><div class="pbar-f" id="pbarf"></div></div>
     </div>
-
     <button class="btnana" id="btnAna" disabled>
       <svg id="anaIco" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       Analizar leyenda del plano
     </button>
-
     <div>
-      <div class="sttl">&#128269; B&uacute;squeda manual</div>
+      <div class="sttl">Busqueda manual</div>
       <div class="sbx" style="margin-bottom:.5rem">
         <svg class="sbx-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="srch" placeholder="Sharpy, Mac Aura, MegaPointe&hellip;">
+        <input type="text" id="srch" placeholder="Sharpy, Mac Aura, MegaPointe...">
         <svg class="sbx-clr" id="srchClr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </div>
       <div class="man-add">
-        <input type="text" id="manIn" placeholder="A&ntilde;adir fixture&hellip;">
+        <input type="text" id="manIn" placeholder="Anadir fixture...">
         <button class="btnadd" id="btnMan">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          A&ntilde;adir
+          Anadir
         </button>
       </div>
     </div>
-
     <div>
-      <div class="sttl">&#127931; Consolas</div>
+      <div class="sttl">Consolas</div>
       <div class="chips">
         <div class="chip on" data-c="ma2">grandMA2</div>
         <div class="chip on" data-c="ma3">grandMA3</div>
@@ -232,336 +219,209 @@ mark{background:color-mix(in oklch,var(--warn) 25%,transparent);color:var(--warn
         <div class="chip on" data-c="gdtf">GDTF</div>
       </div>
     </div>
-
     <div id="detSec" style="display:none">
-      <div class="sttl">&#128203; Detectados <span id="detCnt" style="color:var(--pri);font-family:var(--fm)"></span></div>
+      <div class="sttl">Detectados <span id="detCnt" style="color:var(--pri);font-family:var(--fm)"></span></div>
       <div class="fxlist" id="fxlist"></div>
     </div>
   </aside>
-
   <main class="con" id="con">
     <div class="welcome" id="wel">
       <svg class="welcome-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="10" r="5"/><path d="M12 15v4M7 22h10M4 7l3 3M20 7l-3 3M2 22l3-4h14l3 4"/></svg>
       <h2>Fixture Library Finder</h2>
-      <p>Sube un plano PDF o busca fixtures para obtener enlaces directos a librer&iacute;as.</p>
+      <p>Sube un plano PDF o busca fixtures para obtener enlaces directos a librerias.</p>
       <div class="steps">
-        <div class="step"><div class="step-n">1</div><div class="step-l">Sube el plano PDF (Capture, WYSIWYG&hellip;)</div></div>
-        <div class="step"><div class="step-n">2</div><div class="step-l">Analiza la leyenda autom&aacute;ticamente</div></div>
-        <div class="step"><div class="step-n">3</div><div class="step-l">Descarga librer&iacute;as MA2/MA3/Avo/GDTF</div></div>
+        <div class="step"><div class="step-n">1</div><div class="step-l">Sube el plano PDF</div></div>
+        <div class="step"><div class="step-n">2</div><div class="step-l">Analiza la leyenda</div></div>
+        <div class="step"><div class="step-n">3</div><div class="step-l">Descarga librerias</div></div>
       </div>
     </div>
     <div id="res" style="display:none"></div>
   </main>
 </div>
 </div>
-
 <div class="toast-wrap" id="tw"></div>
-
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-let pdfDoc=null,curPage=1,totPages=0,prevSec=null,cvs=null;
-let detected=[],manual=[];
-let consoles=new Set(['ma2','ma3','avo','gdtf']);
-let query='';
+var pdfDoc=null,curPage=1,totPages=0,prevSec=null,cvs=null;
+var detected=[],manual=[];
+var consoles=new Set(['ma2','ma3','avo','gdtf']);
+var query='';
 
 function norm(s){
-  return String(s)
-    .toLowerCase()
+  return String(s).toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[._\-]/g,' ')
-    .replace(/\s+/g,' ')
-    .trim();
+    .replace(/[._\-]/g,' ').replace(/\s+/g,' ').trim();
 }
 
-const DB=[
+var DB=[
   {m:'Clay Paky',a:['claypaky','clay-paky','clay paky'],n:[
-    'Sharpy','Sharpy Plus','Sharpy Wash 330',
-    'A.leda B-EYE K10','A.leda B-EYE K20','B-EYE K10','B-EYE K20',
-    'Alpha Spot HPE 1500','Alpha Spot QWO 800','Alpha Spot QWO 400',
-    'Alpha Beam 1500','Alpha Beam 700','Alpha Beam 300',
-    'Alpha Wash 1500','Alpha Wash 700',
-    'Axcor Profile 400','Axcor Profile 900','Axcor Profile HC',
-    'Axcor Beam 300','Axcor Beam 300 HC',
-    'Axcor Wash 600','Axcor Wash 300',
-    'Axcor Spot 400','Axcor Spot 900',
-    'Mythos','Mythos 2',
-    'Stormy CC','Stormy TC',
-    'Rhapsody',
-    'Xtylos','Xtylos Aqua',
-    'Koeos','Koeos Quad',
-    'HY B-EYE K25',
-    'Tambora Linear','Tambora Flash','Tambora Racer',
-    'Scenius Unico','Scenius Profile','Scenius Spot','Scenius Wash',
-    'Super Sharpy','Mini-B','Mini-B EVO','Panify',
-    'K20','K10',
-  ]},
+    'Sharpy','Sharpy Plus','Sharpy Wash 330','B-EYE K10','B-EYE K20',
+    'Alpha Spot HPE 1500','Alpha Spot QWO 800','Alpha Beam 1500','Alpha Beam 700',
+    'Alpha Wash 1500','Alpha Wash 700','Axcor Profile 400','Axcor Profile 900',
+    'Axcor Beam 300','Axcor Wash 600','Axcor Spot 400','Axcor Spot 900',
+    'Mythos','Mythos 2','Xtylos','Xtylos Aqua','HY B-EYE K25',
+    'Tambora Linear','Tambora Flash','Scenius Unico','Scenius Profile','Scenius Spot','Scenius Wash',
+    'Super Sharpy','Mini-B','Mini-B EVO','Panify','K20','K10']},
   {m:'Robe',a:['robe lighting'],n:[
-    'Robin 600E Wash','Robin 600E Spot','Robin 600E Beam',
-    'Robin 300E Wash','Robin 300E Spot','Robin 300E Beam',
-    'Robin MMX Spot','Robin MMX WashBeam',
-    'MegaPointe','Pointe',
-    'BMFL Spot','BMFL Wash','BMFL WashBeam','BMFL FollowSpot','iBMFL',
-    'Spiider','iSpiider',
-    'Tarrantula',
-    'LEDBeam 150','LEDBeam 350','LEDBeam 500','LEDBeam 1000',
+    'MegaPointe','Pointe','BMFL Spot','BMFL Wash','BMFL WashBeam','BMFL FollowSpot',
+    'Spiider','iSpiider','LEDBeam 150','LEDBeam 350','LEDBeam 500','LEDBeam 1000',
     'LEDWash 300','LEDWash 600','LEDWash 800','LEDWash 1200',
-    'ESPRITE','Forte','RoboSpot',
-    'Tetra 2','T11','T11 Profile','T2 Profile','T2 Fresnel',
-    'Cycbar 15','Cycbar 30',
-    'iPointe','ParFect 100','Robin DL7S','Robin DL4S',
-    'Robin 800 LEDWash','Robin 1000 LEDWash',
-    'Robin 2 Spot','Robin 2 SpotS',
-  ]},
+    'ESPRITE','Forte','Robin MMX Spot','Robin MMX WashBeam',
+    'Tetra 2','T11','T11 Profile','T2 Profile','iPointe',
+    'Robin DL7S','Robin DL4S','Robin 2 Spot','Tarrantula']},
   {m:'Martin',a:['martin professional'],n:[
     'MAC Aura','MAC Aura XB','MAC Aura PXL',
-    'MAC Ultra Wash','MAC Ultra Performance',
-    'MAC Viper Performance','MAC Viper Profile','MAC Viper Wash','MAC Viper AirFX',
+    'MAC Viper Performance','MAC Viper Profile','MAC Viper Wash',
     'MAC Encore Performance','MAC Encore Wash CLD','MAC Encore Wash WRM',
-    'MAC Quantum Wash','MAC Quantum Profile',
-    'MAC Axiom Hybrid','MAC Axiom Wash',
-    'MAC 101','MAC 101 CTD','MAC 350 Entour','MAC Allure',
-    'MAC III Profile','MAC III AirFX','MAC III Performance',
+    'MAC Quantum Wash','MAC Quantum Profile','MAC Axiom Hybrid',
+    'MAC 101','MAC 350 Entour','MAC Allure',
+    'MAC III Profile','MAC III Performance',
     'Atomic 3000 LED','Atomic 4 LED',
-    'Rush MH 7 Hybrid','Rush MH 10 Beam','Rush MH 10 Profile','Rush MH 11 Profile',
-    'Exterior 600 Wash','Exterior 600 LED Wash',
-    'ERA 600 Performance','ERA 800 Performance',
-    'VC-Grid','VC-Strip','VC-Dot','VC-Dot 9','TILTFLEX',
-  ]},
+    'Rush MH 7 Hybrid','Rush MH 10 Beam','Rush MH 11 Profile',
+    'ERA 600 Performance','ERA 800 Performance','TILTFLEX']},
   {m:'Chauvet Professional',a:['chauvet','chauvet pro'],n:[
     'Maverick MK1 Spot','Maverick MK1 Hybrid','Maverick MK1 Wash',
-    'Maverick MK2 Spot','Maverick MK2 Wash','Maverick MK2 Wash CX',
+    'Maverick MK2 Spot','Maverick MK2 Wash',
     'Maverick MK3 Spot','Maverick MK3 Profile','Maverick MK3 Wash',
-    'Maverick Storm 2 BeamWash',
-    'Rogue R1 Spot','Rogue R1 Wash','Rogue R1 FX-B',
-    'Rogue R2 Spot','Rogue R2 Wash','Rogue R2 BeamWash',
-    'Rogue R3 Spot','Rogue R3 Wash','Rogue R3 BeamWash','Rogue R3X Wash',
-    'Rogue Outcast 2 Beam','Rogue Outcast 2 Wash',
-    'Ovation E-190WW','Ovation E-910FC','Ovation F-915FC','Ovation B-565FC',
-    'Intimidator Spot 475Z','Intimidator Hybrid 140SR',
-    'Colorado 2 Solo','Colorado 1 Solo',
-    'Nexus 4x4','Nexus Aw 7x7',
-    'Strike 4','Strike 1','Strike Array 2',
-  ]},
+    'Rogue R1 Spot','Rogue R1 Wash','Rogue R2 Spot','Rogue R2 Wash',
+    'Rogue R3 Spot','Rogue R3 Wash','Rogue R3X Wash',
+    'Ovation E-190WW','Ovation E-910FC','Colorado 2 Solo',
+    'Strike 4','Strike 1','Nexus 4x4']},
   {m:'ETC',a:['electronic theatre controls'],n:[
     'Source Four','Source Four Jr',
-    'Source Four LED Series 2 Daylight HD','Source Four LED Series 2 Tungsten',
-    'Source Four LED Series 3 Lustr','Source Four LED Series 3 Daylight',
-    'Desire D40 Studio Spot','Desire D60 Vivid-R','Desire D22 Vivid-R',
-    'ColorSource Spot','ColorSource Spot jr','ColorSource Fresnel',
-    'ColorSource Linear 1','ColorSource Linear 2','ColorSource PAR',
-    'Lustr Array 2','Lustr X8',
-    'Selador Desire D40','Selador Vivid-R',
-    'CYC Tool','Echoflex',
-  ]},
+    'Source Four LED Series 2 Daylight HD','Source Four LED Series 3 Lustr',
+    'Desire D40 Studio Spot','Desire D60 Vivid-R',
+    'ColorSource Spot','ColorSource Fresnel','ColorSource PAR',
+    'Lustr Array 2','Lustr X8','CYC Tool']},
   {m:'Ayrton',n:[
-    'MagicBlade-R','MagicBlade-FX','MagicBlade-X',
-    'MagicDot-R','MagicDot-S','MagicDot-XT',
-    'MagicPanel-R','MagicPanel-602','MagicPanel-FX',
-    'MagicBeam','MagicBeam 2',
-    'NandoBeam S3','NandoBeam S6',
+    'MagicBlade-R','MagicBlade-FX','MagicDot-R','MagicDot-S',
+    'MagicPanel-R','MagicPanel-602','MagicBeam',
     'Perseo Spot','Perseo Beam','Perseo Profile',
-    'Ghibli','Ghibli Profile',
-    'Mistral-TC','Mistral Profile-TC',
-    'Cobra','Cobra Profile',
-    'Diablo','Diablo Profile',
-    'Domino Aqua','Domino Profile',
-    'Khamsin','Khamsin Profile','Khamsin Aqua',
-    'Levante Profile','Merak','Merak Aqua',
-    'Karif Profile','Rivale Profile',
-    'Bax','Bax 360',
+    'Ghibli','Ghibli Profile','Mistral-TC','Cobra','Diablo',
+    'Khamsin','Khamsin Profile','Levante Profile',
+    'Merak','Karif Profile','Rivale Profile',
     'Huracan Profile','Huracan Wash',
-    'Kyalami','Kyalami Profile',
-    'Zonda 1','Zonda 3','Zonda 3 FX','Zonda 6','Zonda 6 FX','Zonda 9',
-  ]},
+    'Zonda 1','Zonda 3','Zonda 6','Zonda 9']},
   {m:'SGM',n:[
     'G-7 Beam','G-7 Wash','G-7 Profile',
     'G-Spot','G-Profile','G-Wash',
-    'X-5','X-5 Text','P-5','P-5 POI',
-    'P-2','P-6','Q-7',
-    'LB-160','SB-300','G-Cube',
-  ]},
+    'X-5','P-5','P-2','P-6','Q-7','LB-160','G-Cube']},
   {m:'Vari-Lite',a:['varilite','vari lite'],n:[
-    'VL3000 Spot','VL3000 Wash','VL3015LT Spot','VL3500 Wash',
+    'VL3000 Spot','VL3000 Wash','VL3500 Wash',
     'VL2600 Spot','VL2600 Profile','VL2600 Wash',
     'VL4000 Spot','VL4000 BeamWash',
     'VL2500 Spot','VL2500 Wash',
-    'VL6C','VL800 EventWash',
-    'VL10 BeamWash','VL10 Wash',
-    'VL1000 AS','VL1100 TSD',
-    'VL4K Wash','VL4K Spot',
-  ]},
+    'VL6C','VL800 EventWash','VL10 BeamWash','VL4K Wash','VL4K Spot']},
   {m:'GLP',a:['german light products'],n:[
-    'impression X4','impression X4 Bar 10','impression X4 Bar 20','impression X4 S','impression X4 L',
-    'impression X5','impression X5 Wash','impression X5 Bar 20',
-    'impression FR10 Bar','impression FR1',
-    'JDC1','JDC Line',
-    'KNV Arc','KNV Cube','KNV Dot',
-    'X4 Bar 10','X4 Bar 20',
-    'GT-1','GT-1 Beam',
-    'Fusion Par FQ 16','Fusion Panel FQ 16',
-    'impression S350','impression E350',
-    'Highlander Compact','Highlander Profile',
-    'Ypoc Flex 16',
-  ]},
+    'impression X4','impression X4 Bar 10','impression X4 Bar 20','impression X4 S',
+    'impression X5','impression X5 Wash',
+    'JDC1','JDC Line','KNV Arc','KNV Cube','KNV Dot',
+    'X4 Bar 10','X4 Bar 20','GT-1',
+    'impression S350','Highlander Compact','Highlander Profile']},
   {m:'Elation',a:['elation professional'],n:[
-    'Artiste DaVinci','Artiste Mondrian','Artiste Picasso','Artiste Monet','Artiste Rembrandt','Artiste Camille',
-    'Fuze Profile','Fuze Wash Z350','Fuze Max Profile','Fuze Max Wash',
+    'Artiste DaVinci','Artiste Mondrian','Artiste Picasso','Artiste Monet',
+    'Fuze Profile','Fuze Wash Z350','Fuze Max Profile',
     'Smarty Hybrid','Smarty Max',
     'Proteus Maximus','Proteus Rayzor 760','Proteus Hybrid',
-    'SixPar 200','SixPar 300',
-    'Rayzor Q12','Rayzor 2 Crosshair',
-    'Cuepix Blinder WW4','Cuepix Panel WW',
-    'KL Panel 96','KL Fresnel 8',
-    'Paladin Panel','Dartz 360','Dartz 360 ST',
-  ]},
+    'SixPar 200','SixPar 300','KL Panel 96','KL Fresnel 8',
+    'Paladin Panel','Dartz 360']},
   {m:'Cameo',a:['cameo light'],n:[
-    'ZENIT B200','ZENIT B200 IP',
-    'ZENIT W600','ZENIT W600 IP',
-    'ZENIT S30','ZENIT S40',
-    'Movo Beam Z100',
-    'Auro Spot Z300','Auro Spot 300 G2',
-    'Evos W7','Evos W5','Evos W4',
+    'ZENIT B200','ZENIT B200 IP','ZENIT W600','ZENIT W600 IP',
+    'ZENIT S30','ZENIT S40','Movo Beam Z100',
+    'Auro Spot Z300','Evos W7','Evos W5','Evos W4',
     'Opus H5','Opus X Spot','Opus X Beam','Opus X Wash','Opus X Profile',
-    'F4 FC','F4 FC IP65',
-    'PIXBAR 600 PRO','PIXBAR 400 FC',
-    'DAGE 18 FC','DAGE 100',
-  ]},
+    'F4 FC','PIXBAR 600 PRO','PIXBAR 400 FC']},
   {m:'Astera',a:['astera led technology'],n:[
-    'Titan Tube','Titan Tube Plus',
-    'Helios Tube',
+    'Titan Tube','Titan Tube Plus','Helios Tube',
     'AX1 PixelTube','AX3 LightDrop','AX5 TriplePAR',
-    'Hydra Smart Light','NYX Bulb','FP5 FlexPin',
-    'Nanoline',
-  ]},
+    'Hydra Smart Light','NYX Bulb','FP5 FlexPin','Nanoline']},
   {m:'Robert Juliat',a:['rj','robert-juliat'],n:[
-    'Korrigan LT','Korrigan HC',
-    'Oz','Oz LT',
-    'Dalis 860','Dalis 862',
-    'Aledin 60 FC','Aledin 40',
-    'Victor','Arthur','Lancelot',
-    'Cezanne','Roxane','Roxane HC',
-    'Merlin','Tibo','Esprit',
-    'Sully','Lutin',
-  ]},
+    'Korrigan LT','Korrigan HC','Oz','Oz LT',
+    'Dalis 860','Dalis 862','Aledin 60 FC','Aledin 40',
+    'Victor','Arthur','Lancelot','Roxane','Roxane HC',
+    'Merlin','Tibo','Esprit','Sully']},
   {m:'Showtec',n:[
     'Phantom 120 Spot','Phantom 65 Spot','Phantom 75 Beam','Phantom 130 Beam',
-    'Phantom 130 Profile',
     'Cameleon Spot 7Q5','Cameleon Wash 7Q5',
-    'Infinity S521','Infinity iW-1915 Pixel',
-    'Spectral 3000 Q7',
-    'LED PAR 64 18x3W',
-  ]},
+    'Infinity S521','Spectral 3000 Q7']},
   {m:'Prolights',a:['pro lights'],n:[
     'Stark 400Bwash','Stark 400Profile',
     'Panorama IP','Panorama 300CW',
-    'Aero','ArcPar','ArcPar12Q4',
-    'LUMA 700H','LUMA 1000E',
-    'SmartBat CL','SmartBar 2',
-    'EclEdge PXL','EclPanel IP',
-  ]},
-  {m:'LEDJ',a:['ledj lighting','led j'],n:[
+    'Aero','ArcPar','LUMA 700H','LUMA 1000E',
+    'EclEdge PXL','EclPanel IP']},
+  {m:'LEDJ',a:['ledj lighting'],n:[
     'Performer 18 MKII','Performer 12 HEX','Performer 7 HEX',
-    'TriPar 64','TriPar 38',
-    'Rapid 7 HEX','Rapid 10 HEX',
-  ]},
+    'TriPar 64','TriPar 38','Rapid 7 HEX','Rapid 10 HEX']},
   {m:'JB-Lighting',a:['jb lighting'],n:[
     'Sparx 7','Sparx 7 II','Sparx 10','Sparx MK2',
-    'P5','P12','P18','A7','A12',
-    'Varyscan P3','Varyscan P7',
-  ]},
+    'P5','P12','P18','A7','A12','Varyscan P3','Varyscan P7']},
   {m:'Stairville',n:[
     'MH-X25 Beam','MH-X200 Beam',
-    'LED PAR 64 18x3W TCO','LED PAR 64 12x3W',
-    'CLB5 Flat Pro 7x12W','CLB5 Flat Pro 12x3W',
-    'SF-500 Followspot',
-  ]},
+    'CLB5 Flat Pro 7x12W','SF-500 Followspot']},
   {m:'Acme',a:['acme lighting'],n:[
     'AX-5 Beam','AX-7 Beam','ACME iStar Beam',
-    'Xpot12 Beam','Xpot7 Beam',
-    'XP-800Z Profile','UV Cannon',
-  ]},
-  {m:'Nicols',n:[
-    'Styx 300 SP','Styx 300 W',
-    'Cyclope 300 SP','Cyclope 300 B',
-    'Rocky 300 SP',
-  ]},
+    'Xpot12 Beam','Xpot7 Beam','XP-800Z Profile']},
+  {m:'Nicols',n:['Styx 300 SP','Styx 300 W','Cyclope 300 SP','Rocky 300 SP']},
   {m:'Chroma-Q',a:['chromaq','chroma q'],n:[
     'Color Force II 12','Color Force II 48',
     'Space Force 3','Space Force 6',
-    'Color One 100B','Color One 75',
-    'Color Charge','Space Charge',
-  ]},
+    'Color One 100B','Color Charge','Space Charge']},
   {m:'Rosco',a:['rosco laboratories'],n:[
     'Miro Cube WIM','Miro Cube 4C','Miro Cube 2C',
-    'Braq Cube 4C','Braq Cube WIM',
-    'LitePad','LitePad HO+ Daylight','LitePad Vector',
-  ]},
-  {m:'Strand',a:['strand lighting'],n:[
-    'SL NITRO 510C','SL NITRO 510',
-    'SL Fresnel 7','SL Leko','SL PAR',
-  ]},
+    'Braq Cube 4C','LitePad','LitePad Vector']},
+  {m:'Strand',a:['strand lighting'],n:['SL NITRO 510C','SL NITRO 510','SL Fresnel 7','SL Leko','SL PAR']},
   {m:'Lycian',n:['Trouper','Starklite','Automated Leko','m2 LED Spot']},
   {m:'PRG',a:['production resource group'],n:[
-    'Best Boy HP','Best Boy Spot','Best Boy LED',
-    'Bad Boy','Bad Boy HP','Mbox',
-  ]},
+    'Best Boy HP','Best Boy Spot','Best Boy LED','Bad Boy','Mbox']},
   {m:'Arri',a:['arri lighting'],n:[
     'SkyPanel S60-C','SkyPanel S30-C','SkyPanel S120-C','SkyPanel S360-C',
-    'Orbiter','Orbiter Plus',
-    'L7-C','L5-C','L10-C','VariCool 2',
-  ]},
+    'Orbiter','Orbiter Plus','L7-C','L5-C','L10-C']},
   {m:'Litepanels',a:['lite panels'],n:[
     'Gemini 1x1','Gemini 2x1',
     'Astra 6X Bi-Color','Astra 3X Bi-Color',
-    'Sola 4+','Sola 6+','Brick','Ringlite',
-  ]},
+    'Sola 4+','Sola 6+','Brick']},
   {m:'Kino Flo',a:['kinoflo'],n:[
     'Select 31 DMX','Select 20 DMX',
     'Celeb 201 LED','Celeb 401 LED',
     'Diva-Lite 21','Diva-Lite 31',
-    'FreeStyle 21 LED','FreeStyle 31 LED',
-  ]},
+    'FreeStyle 21 LED','FreeStyle 31 LED']},
   {m:'Generic',a:['generico','convencional'],n:[
     'PAR64','PAR56','PAR38','PAR 64','PAR 56','PAR 38',
-    'Fresnel','PC','Plano-convexo',
-    'Ellipsoidal','Profile Spot',
+    'Fresnel','PC','Ellipsoidal','Profile Spot',
     'Moving Head','Moving Head Beam','Moving Head Spot','Moving Head Wash','Moving Head Hybrid',
     'LED Bar','LED Strip','LED Batten',
-    'Strobe','LED Strobe','Atomic Strobe',
-    'Dimmer','Dimmer Pack',
-    'Cyclorama','Cyc Light','LED Cyc',
-    'Blinder','LED Blinder',
-    'Followspot','Follow Spot',
-    'Sunstrips','Audience Blinder',
-    'UV Par','UV Bar',
-    'Hazer','Fogger','Haze Machine',
-    'PAR Can','LED PAR',
-  ]},
+    'Strobe','LED Strobe','Dimmer','Dimmer Pack',
+    'Cyclorama','Cyc Light','LED Cyc','Blinder','LED Blinder',
+    'Followspot','Follow Spot','UV Par','UV Bar',
+    'Hazer','Fogger','Haze Machine','PAR Can','LED PAR']},
 ];
 
-const ALLF=[];
-DB.forEach(entry=>{
-  entry.n.forEach(name=>{
-    ALLF.push({name, mfr:entry.m, normName:norm(name), normMfr:norm(entry.m), mfrAliases:(entry.a||[]).map(norm)});
+var ALLF=[];
+DB.forEach(function(entry){
+  entry.n.forEach(function(name){
+    ALLF.push({
+      name:name, mfr:entry.m,
+      normName:norm(name), normMfr:norm(entry.m),
+      mfrAliases:(entry.a||[]).map(norm)
+    });
   });
 });
 
-function findFixture(rawQuery){
-  const q=norm(rawQuery);
-  let hit=ALLF.find(f=>f.normName===q);
+function findFixture(raw){
+  var q=norm(raw);
+  var hit=ALLF.find(function(f){return f.normName===q;});
   if(hit)return hit;
-  hit=ALLF.find(f=>f.normName.includes(q)||q.includes(f.normName));
+  hit=ALLF.find(function(f){return f.normName.includes(q)||q.includes(f.normName);});
   if(hit)return hit;
-  const words=q.split(' ').filter(Boolean);
-  hit=ALLF.find(f=>words.every(w=>f.normName.includes(w)));
-  if(hit)return hit;
-  return null;
+  var words=q.split(' ').filter(Boolean);
+  hit=ALLF.find(function(f){return words.every(function(w){return f.normName.includes(w);});});
+  return hit||null;
 }
 
-const thmBtn=document.getElementById('thmBtn');
-let dark=true;
-thmBtn.addEventListener('click',()=>{
+// THEME
+var thmBtn=document.getElementById('thmBtn');
+var dark=true;
+thmBtn.addEventListener('click',function(){
   dark=!dark;
   document.documentElement.setAttribute('data-theme',dark?'dark':'light');
   thmBtn.innerHTML=dark
@@ -569,43 +429,47 @@ thmBtn.addEventListener('click',()=>{
     :'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
 });
 
-function toast(msg,type='nfo',ms=3200){
-  const c=document.getElementById('tw'),t=document.createElement('div');
-  t.className='toast '+type;t.textContent=msg;c.appendChild(t);
-  requestAnimationFrame(()=>t.classList.add('on'));
-  setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),300);},ms);
+// TOAST
+function toast(msg,type,ms){
+  type=type||'nfo'; ms=ms||3200;
+  var c=document.getElementById('tw'),t=document.createElement('div');
+  t.className='toast '+type; t.textContent=msg; c.appendChild(t);
+  requestAnimationFrame(function(){t.classList.add('on');});
+  setTimeout(function(){t.classList.remove('on');setTimeout(function(){t.remove();},300);},ms);
 }
 
-const dz=document.getElementById('dz'),fi=document.getElementById('fi');
-dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
-dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
-dz.addEventListener('drop',e=>{
+// DROP ZONE
+var dz=document.getElementById('dz'),fi=document.getElementById('fi');
+dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',function(){dz.classList.remove('over');});
+dz.addEventListener('drop',function(e){
   e.preventDefault();dz.classList.remove('over');
-  const f=e.dataTransfer.files[0];
+  var f=e.dataTransfer.files[0];
   if(f&&f.type==='application/pdf')loadPDF(f);
   else toast('Solo archivos PDF','wrn');
 });
-fi.addEventListener('change',e=>{if(e.target.files[0])loadPDF(e.target.files[0]);});
+fi.addEventListener('change',function(e){if(e.target.files[0])loadPDF(e.target.files[0]);});
 document.getElementById('rmv').addEventListener('click',clearPDF);
 
-async function loadPDF(file){
+function loadPDF(file){
   document.getElementById('pn').textContent=file.name;
-  document.getElementById('pm').textContent=(file.size/1024).toFixed(0)+' KB';
+  document.getElementById('pm').textContent=Math.round(file.size/1024)+' KB';
   document.getElementById('pinfoWrap').style.display='';
   dz.style.display='none';
   document.getElementById('btnAna').disabled=false;
-  try{
-    const buf=await file.arrayBuffer();
-    pdfDoc=await pdfjsLib.getDocument({data:buf}).promise;
-    totPages=pdfDoc.numPages;curPage=1;
-    document.getElementById('pm').textContent=(file.size/1024).toFixed(0)+' KB \u00b7 '+totPages+' p\u00e1g.';
+  var buf;
+  file.arrayBuffer().then(function(b){
+    return pdfjsLib.getDocument({data:b}).promise;
+  }).then(function(doc){
+    pdfDoc=doc; totPages=doc.numPages; curPage=1;
+    document.getElementById('pm').textContent=Math.round(file.size/1024)+' KB - '+totPages+' pag.';
     showPreview();
-    toast('PDF cargado: '+totPages+' p\u00e1gina'+(totPages>1?'s':''),'ok');
-  }catch(e){toast('Error al leer PDF: '+e.message,'wrn');}
+    toast('PDF cargado: '+totPages+' pagina'+(totPages>1?'s':''),'ok');
+  }).catch(function(e){toast('Error al leer PDF: '+e.message,'wrn');});
 }
 
 function clearPDF(){
-  pdfDoc=null;fi.value='';detected=[];manual=[];
+  pdfDoc=null; fi.value=''; detected=[]; manual=[];
   document.getElementById('pinfoWrap').style.display='none';
   dz.style.display='';
   document.getElementById('btnAna').disabled=true;
@@ -618,65 +482,223 @@ function clearPDF(){
 }
 
 function showPreview(){
-  const wel=document.getElementById('wel'),res=document.getElementById('res');
-  wel.style.display='none';res.style.display='';
+  var wel=document.getElementById('wel'),res=document.getElementById('res');
+  wel.style.display='none'; res.style.display='';
   if(!prevSec){
     prevSec=document.createElement('div');
     prevSec.className='pdf-prev';
-    prevSec.innerHTML='<div class="pdf-prev-h"><span class="pdf-prev-t">Vista previa</span><div class="pdf-pctl"><button class="pdf-pbtn" id="pp" disabled>&#8249;</button><span id="plbl">\u2014</span><button class="pdf-pbtn" id="np" disabled>&#8250;</button></div></div><div class="pdf-cvw"><canvas id="cvs"></canvas></div>';
+    prevSec.innerHTML='<div class="pdf-prev-h"><span class="pdf-prev-t">Vista previa</span><div class="pdf-pctl"><button class="pdf-pbtn" id="pp" disabled>&lsaquo;</button><span id="plbl">-</span><button class="pdf-pbtn" id="np" disabled>&rsaquo;</button></div></div><div class="pdf-cvw"><canvas id="cvs"></canvas></div>';
     res.insertBefore(prevSec,res.firstChild);
     cvs=prevSec.querySelector('#cvs');
-    prevSec.querySelector('#pp').addEventListener('click',()=>{if(curPage>1){curPage--;renderPg(curPage);}});
-    prevSec.querySelector('#np').addEventListener('click',()=>{if(curPage<totPages){curPage++;renderPg(curPage);}});
+    prevSec.querySelector('#pp').addEventListener('click',function(){if(curPage>1){curPage--;renderPg(curPage);}});
+    prevSec.querySelector('#np').addEventListener('click',function(){if(curPage<totPages){curPage++;renderPg(curPage);}});
   }
   renderPg(1);
 }
 
-async function renderPg(n){
+function renderPg(n){
   if(!pdfDoc)return;
-  const pg=await pdfDoc.getPage(n);
-  const vp=pg.getViewport({scale:1.2});
-  cvs.width=vp.width;cvs.height=vp.height;
-  await pg.render({canvasContext:cvs.getContext('2d'),viewport:vp}).promise;
-  curPage=n;
-  prevSec.querySelector('#plbl').textContent=n+'/'+totPages;
-  prevSec.querySelector('#pp').disabled=n<=1;
-  prevSec.querySelector('#np').disabled=n>=totPages;
+  pdfDoc.getPage(n).then(function(pg){
+    var vp=pg.getViewport({scale:1.2});
+    cvs.width=vp.width; cvs.height=vp.height;
+    return pg.render({canvasContext:cvs.getContext('2d'),viewport:vp}).promise;
+  }).then(function(){
+    curPage=n;
+    prevSec.querySelector('#plbl').textContent=n+'/'+totPages;
+    prevSec.querySelector('#pp').disabled=n<=1;
+    prevSec.querySelector('#np').disabled=n>=totPages;
+  });
 }
 
+// ANALYZE
 document.getElementById('btnAna').addEventListener('click',analyzePDF);
 
-async function analyzePDF(){
+function analyzePDF(){
   if(!pdfDoc){toast('Carga un PDF','wrn');return;}
   document.getElementById('btnAna').disabled=true;
-  const ico=document.getElementById('anaIco');ico.classList.add('spin');
-  const pb=document.getElementById('pbar'),pf=document.getElementById('pbarf');
-  pb.style.display='';pf.style.width='0%';
-
-  let txt='';
-  for(let i=1;i<=totPages;i++){
-    const pg=await pdfDoc.getPage(i);
-    const tc=await pg.getTextContent();
-    txt+=tc.items.map(x=>x.str).join(' ')+'\n';
-    pf.style.width=((i/totPages)*100)+'%';
+  var ico=document.getElementById('anaIco'); ico.classList.add('spin');
+  var pb=document.getElementById('pbar'),pf=document.getElementById('pbarf');
+  pb.style.display=''; pf.style.width='0%';
+  var pages=[], i;
+  for(i=1;i<=totPages;i++){pages.push(i);}
+  var txt='', done=0;
+  function next(){
+    if(!pages.length){
+      detected=extractFixtures(txt);
+      pb.style.display='none'; ico.classList.remove('spin');
+      document.getElementById('btnAna').disabled=false;
+      if(detected.length===0){toast('Sin fixtures conocidos. Anade manualmente.','wrn');}
+      else{
+        toast(detected.length+' fixture'+(detected.length>1?'s':'')+' detectado'+(detected.length>1?'s':'')+'!','ok');
+        renderList(); renderResults();
+      }
+      return;
+    }
+    var pg=pages.shift();
+    pdfDoc.getPage(pg).then(function(p){
+      return p.getTextContent();
+    }).then(function(tc){
+      txt+=tc.items.map(function(x){return x.str;}).join(' ')+'\n';
+      done++;
+      pf.style.width=(done/totPages*100)+'%';
+      next();
+    });
   }
-  detected=extractFixtures(txt);
-  pb.style.display='none';ico.classList.remove('spin');
-  document.getElementById('btnAna').disabled=false;
-
-  if(detected.length===0){toast('Sin fixtures conocidos. A\u00f1ade manualmente.','wrn');}
-  else{
-    toast(detected.length+' fixture'+(detected.length>1?'s':'')+' detectado'+(detected.length>1?'s':'')+'!','ok');
-    renderList();renderResults();
-  }
+  next();
 }
 
 function extractFixtures(text){
-  const found=new Map();
-  const normText=norm(text);
+  var found=new Map();
+  var normText=norm(text);
   ALLF.forEach(function(f){
-    const escaped=f.normName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    const re=new RegExp('(?<![a-z0-9])'+escaped+'(?![a-z0-9])');
+    var esc=f.normName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    var re=new RegExp('(?<![a-z0-9])'+esc+'(?![a-z0-9])');
     if(re.test(normText)){
-      const k=f.mfr+':::'+f.name;
-      if(!found.has(k))found.set(k,{name:f.name,mf
+      var k=f.mfr+':::'+f.name;
+      if(!found.has(k))found.set(k,{name:f.name,mfr:f.mfr,src:'pdf'});
+    }
+  });
+  return Array.from(found.values());
+}
+
+// MANUAL ADD
+document.getElementById('btnMan').addEventListener('click',doManual);
+document.getElementById('manIn').addEventListener('keydown',function(e){if(e.key==='Enter')doManual();});
+
+function doManual(){
+  var v=document.getElementById('manIn').value.trim();
+  if(!v){toast('Escribe el nombre','wrn');return;}
+  var hit=findFixture(v);
+  var fx=hit?{name:hit.name,mfr:hit.mfr,src:'manual'}:{name:v,mfr:'Unknown',src:'manual'};
+  var k=fx.mfr+':::'+fx.name;
+  if(detected.find(function(f){return f.mfr+':::'+f.name===k;})||manual.find(function(f){return f.mfr+':::'+f.name===k;})){
+    toast('Ya esta en la lista','nfo');return;
+  }
+  manual.push(fx);
+  document.getElementById('manIn').value='';
+  renderList(); renderResults();
+  toast('"'+fx.name+'" anadido','ok');
+}
+
+// CHIPS
+document.querySelectorAll('.chip').forEach(function(c){
+  c.addEventListener('click',function(){
+    var id=c.dataset.c;
+    if(consoles.has(id)){consoles.delete(id);c.classList.remove('on');}
+    else{consoles.add(id);c.classList.add('on');}
+    renderResults();
+  });
+});
+
+// SEARCH
+document.getElementById('srch').addEventListener('input',function(e){
+  query=e.target.value.trim();
+  document.getElementById('srchClr').classList.toggle('on',query.length>0);
+  renderResults();
+});
+document.getElementById('srchClr').addEventListener('click',function(){
+  document.getElementById('srch').value=''; query='';
+  document.getElementById('srchClr').classList.remove('on');
+  renderResults();
+});
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function hl(s){
+  if(!query)return s;
+  return s.replace(new RegExp('('+query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>');
+}
+
+function links(fx){
+  var q=encodeURIComponent(fx.name);
+  return {
+    ma2:'https://www.malighting.com/training-support/fixture-shares/',
+    ma3:'https://gdtf-share.com/?page=gdtf&search='+q,
+    avo:'https://personalities.avolites.com/?mainPage=Main.asp&Search='+q,
+    avof:'https://www.avofixturefinder.com/?q='+q,
+    gdtf:'https://gdtf-share.com/?page=gdtf&search='+q
+  };
+}
+
+var EXT='<svg class="lnk-ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+
+function renderList(){
+  var sec=document.getElementById('detSec'),lst=document.getElementById('fxlist');
+  var all=detected.concat(manual);
+  if(!all.length){sec.style.display='none';return;}
+  sec.style.display=''; document.getElementById('detCnt').textContent='('+all.length+')';
+  lst.innerHTML='';
+  all.forEach(function(f,i){
+    var el=document.createElement('div'); el.className='fxtag';
+    el.innerHTML='<span class="fxtag-n">'+esc(f.name)+'</span><span class="fxtag-m">'+esc(f.mfr)+'</span><span class="fxtag-b">'+(f.src==='pdf'?'PDF':'Manual')+'</span>';
+    el.addEventListener('click',function(){
+      el.classList.toggle('on');
+      var c=document.getElementById('c'+i);
+      if(c)c.scrollIntoView({behavior:'smooth',block:'center'});
+    });
+    lst.appendChild(el);
+  });
+}
+
+function renderResults(){
+  var res=document.getElementById('res'),wel=document.getElementById('wel');
+  var all=detected.concat(manual);
+  if(!all.length&&!query){wel.style.display='';res.style.display='none';return;}
+  wel.style.display='none'; res.style.display='';
+
+  var filtered=all.slice();
+  if(query){
+    var ql=norm(query);
+    filtered=all.filter(function(f){return norm(f.name).includes(ql)||norm(f.mfr).includes(ql);});
+    if(!filtered.length){
+      var sr=[], seen=new Set();
+      ALLF.forEach(function(f){
+        var words=ql.split(' ').filter(Boolean);
+        if(f.normName.includes(ql)||f.normMfr.includes(ql)||words.every(function(w){return f.normName.includes(w)||f.normMfr.includes(w);})){
+          var k=f.mfr+':::'+f.name;
+          if(!seen.has(k)){seen.add(k);sr.push({name:f.name,mfr:f.mfr,src:'search'});}
+        }
+      });
+      filtered=sr.slice(0,16);
+    }
+  }
+
+  var html='<div class="rh"><div class="rh-t">Librerias de fixtures</div><div class="rh-c">'+filtered.length+' resultado'+(filtered.length!==1?'s':'')+'</div></div>';
+
+  if(!filtered.length){
+    html+='<div class="empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><h3>Sin resultados</h3><p>Prueba otra busqueda o anade el fixture manualmente.</p></div>';
+  } else {
+    html+='<div class="grid">';
+    filtered.forEach(function(f,i){
+      var L=links(f);
+      var badge=f.src==='pdf'?'<span class="card-src src-p">PDF</span>':f.src==='manual'?'<span class="card-src src-m">Manual</span>':'';
+      var ls='';
+      if(consoles.has('ma2'))ls+='<a class="lnk ma2" href="'+L.ma2+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">grandMA2 FixtureShare</span>'+EXT+'</a>';
+      if(consoles.has('ma3'))ls+='<a class="lnk ma3" href="'+L.ma3+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">grandMA3 / GDTF Share</span>'+EXT+'</a>';
+      if(consoles.has('avo')){
+        ls+='<a class="lnk avo" href="'+L.avo+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">Avolites Personality Library</span>'+EXT+'</a>';
+        ls+='<a class="lnk avo" href="'+L.avof+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">AvoFixtureFinder <span class="lnk-note">(por canal DMX)</span></span>'+EXT+'</a>';
+      }
+      if(consoles.has('gdtf'))ls+='<a class="lnk gdtf" href="'+L.gdtf+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">GDTF Share (universal)</span>'+EXT+'</a>';
+      if(!ls)ls='<span style="font-size:10px;color:var(--faint);padding:4px">Selecciona al menos una consola</span>';
+      html+='<div class="card" id="c'+i+'">';
+      html+='<div class="card-h"><div class="card-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="10" r="4"/><path d="M12 14v5M8 22h8M6 7l2 2M18 7l-2 2"/></svg></div>';
+      html+='<div><div class="card-n">'+hl(esc(f.name))+'</div><div class="card-m">'+hl(esc(f.mfr))+'</div></div>'+badge+'</div>';
+      html+='<div class="card-l">'+ls+'</div></div>';
+    });
+    html+='</div>';
+  }
+
+  var prev=prevSec;
+  if(prev&&prev.parentNode===res){
+    var tmp=document.createElement('div'); tmp.innerHTML=html;
+    var children=Array.from(res.children);
+    children.forEach(function(c){if(c!==prev)c.remove();});
+    Array.from(tmp.children).forEach(function(c){res.appendChild(c);});
+  } else {
+    res.innerHTML=html;
+    if(prev)res.insertBefore(prev,res.firstChild);
+  }
+}
+</script>
+</body>
+</html>
