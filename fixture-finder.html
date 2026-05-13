@@ -266,29 +266,393 @@ let detected=[],manual=[];
 let consoles=new Set(['ma2','ma3','avo','gdtf']);
 let query='';
 
-// FIXTURE DB
-const DB=[
-  {m:'Clay Paky',n:['Sharpy','A.leda B-EYE K10','K20','Alpha Spot','Alpha Beam','Stormy','Axcor Profile','Axcor Beam','Axcor Wash','Rhapsody','Mythos','Xtylos','Koeos']},
-  {m:'Robe',n:['Robin 600E','MegaPointe','Pointe','BMFL','Spiider','Tarrantula','LEDBeam 150','LEDBeam 350','LEDWash','ESPRITE','Forte','RoboSpot','Robin 300E','Tetra','T11','T2 Profile','Cycbar','Robin MMX','iPointe','iSpiider','iBMFL']},
-  {m:'Martin',n:['Mac Aura','Mac Ultra','Mac Viper','Mac Encore','Mac Quantum','Mac Axiom','MAC 101','MAC 350','Mac Allure','MAC III','Atomic 3000','Rush MH','Exterior 600','ERA 600']},
-  {m:'Chauvet',n:['Maverick MK1','Maverick MK2','Maverick MK3','Rogue R1','Rogue R2','Rogue R3','Ovation','Intimidator','Colorado','Nexus','Strike','Maverick Storm']},
-  {m:'ETC',n:['Source Four','Source Four LED','Desire','ColorSource','CYC','ColorSource Linear','Lustr','Selador']},
-  {m:'Ayrton',n:['MagicBlade','MagicDot','MagicPanel','MagicBeam','NandoBeam','Perseo','Ghibli','Mistral','Cobra','Diablo','Domino','Khamsin','Levante']},
-  {m:'SGM',n:['G-7 Beam','G-7 Wash','G-7 Profile','X-5','P-5','Q-7','P-2','P-6','G-Spot','G-Profile']},
-  {m:'Vari-Lite',n:['VL3000','VL2600','VL4000','VL2500','VL6C','VL800','VL10']},
-  {m:'GLP',n:['impression X4','impression X5','impression FR10','JDC1','JDC Line','KNV','X4 Bar','X4 S','GT-1','Fusion']},
-  {m:'Elation',n:['Artiste','Fuze','Smarty','Proteus Maximus','SixPar','Artiste Monet','Artiste Picasso','Fuze Max','Rayzor']},
-  {m:'Cameo',n:['ZENIT B200','Movo Beam Z100','Auro Spot Z300','Evos W7','ZENIT W600','Opus H5','Evos W5']},
-  {m:'Astera',n:['Titan Tube','Helios Tube','AX1','AX3','Hydra','NYX Bulb','FP5']},
-  {m:'Robert Juliat',n:['Korrigan','Oz','Dalis','Aledin','Victor','Arthur','Lancelot']},
-  {m:'Claypaky',n:['HY B-EYE K25','Tambora','Scenius']},
-  {m:'Showtec',n:['Phantom 120','Phantom 75','Phantom 65','Phantom 130']},
-  {m:'Generic',n:['PAR64','PAR56','PAR38','Fresnel','PC','Ellipsoidal','Profile','Moving Head','LED Bar','Strobe','Dimmer','Cyclorama']},
-];
-const ALLF=[];
-DB.forEach(e=>e.n.forEach(n=>ALLF.push({name:n,mfr:e.m})));
+// ─── NORMALIZE helper ────────────────────────────────────────────────────────
+// Strips accents, lowercases, collapses spaces/dots/hyphens/underscores
+function norm(s){
+  return String(s)
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[._\-]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
 
-// THEME
+// ─── FIXTURE DATABASE ────────────────────────────────────────────────────────
+// Each entry: { m: 'Display Name', a: ['alias1','alias2'…], n: ['Model',…] }
+// 'a' = optional manufacturer aliases used for fuzzy matching
+const DB=[
+  // ── Clay Paky (unified) ──────────────────────────────────────────────────
+  {m:'Clay Paky',a:['claypaky','clay-paky','clay paky'],n:[
+    'Sharpy','Sharpy Plus','Sharpy Wash 330',
+    'A.leda B-EYE K10','A.leda B-EYE K20','B-EYE K10','B-EYE K20',
+    'Alpha Spot HPE 1500','Alpha Spot QWO 800','Alpha Spot QWO 400',
+    'Alpha Beam 1500','Alpha Beam 700','Alpha Beam 300',
+    'Alpha Wash 1500','Alpha Wash 700',
+    'Axcor Profile 400','Axcor Profile 900','Axcor Profile HC',
+    'Axcor Beam 300','Axcor Beam 300 HC',
+    'Axcor Wash 600','Axcor Wash 300',
+    'Axcor Spot 400','Axcor Spot 900',
+    'Mythos','Mythos 2',
+    'Stormy CC','Stormy TC',
+    'Rhapsody',
+    'Xtylos','Xtylos Aqua',
+    'Koeos','Koeos Quad',
+    'HY B-EYE K25',
+    'Tambora Linear','Tambora Flash','Tambora Racer',
+    'Scenius Unico','Scenius Profile','Scenius Spot','Scenius Wash',
+    'Super Sharpy','Mini-B','Mini-B EVO','Panify',
+    'K20','K10',
+  ]},
+
+  // ── Robe ────────────────────────────────────────────────────────────────
+  {m:'Robe',a:['robe lighting'],n:[
+    'Robin 600E Wash','Robin 600E Spot','Robin 600E Beam',
+    'Robin 300E Wash','Robin 300E Spot','Robin 300E Beam',
+    'Robin MMX Spot','Robin MMX WashBeam',
+    'MegaPointe','Pointe',
+    'BMFL Spot','BMFL Wash','BMFL WashBeam','BMFL FollowSpot','iBMFL',
+    'Spiider','iSpiider',
+    'Tarrantula',
+    'LEDBeam 150','LEDBeam 350','LEDBeam 500','LEDBeam 1000',
+    'LEDWash 300','LEDWash 600','LEDWash 800','LEDWash 1200',
+    'ESPRITE',
+    'Forte',
+    'RoboSpot',
+    'Tetra 2','T11','T11 Profile','T2 Profile','T2 Fresnel',
+    'Cycbar 15','Cycbar 30',
+    'iPointe',
+    'ParFect 100','Robin DL7S','Robin DL4S',
+    'Fortes','600 LEDSPOT','600 LEDWASH',
+    'Robin 800 LEDWash','Robin 1000 LEDWash',
+    'Robin 2 Spot','Robin 2 SpotS',
+  ]},
+
+  // ── Martin ──────────────────────────────────────────────────────────────
+  {m:'Martin',a:['martin professional'],n:[
+    'MAC Aura','MAC Aura XB','MAC Aura PXL',
+    'MAC Ultra Wash','MAC Ultra Performance',
+    'MAC Viper Performance','MAC Viper Profile','MAC Viper Wash','MAC Viper AirFX',
+    'MAC Encore Performance','MAC Encore Wash CLD','MAC Encore Wash WRM',
+    'MAC Quantum Wash','MAC Quantum Profile',
+    'MAC Axiom Hybrid','MAC Axiom Wash',
+    'MAC 101','MAC 101 CTD',
+    'MAC 350 Entour',
+    'MAC Allure',
+    'MAC III Profile','MAC III AirFX','MAC III Performance',
+    'Atomic 3000 LED','Atomic 4 LED',
+    'Rush MH 7 Hybrid','Rush MH 10 Beam','Rush MH 10 Profile','Rush MH 11 Profile',
+    'Exterior 600 Wash','Exterior 600 LED Wash',
+    'ERA 600 Performance','ERA 800 Performance',
+    'VC-Grid','VC-Strip','VC-Dot','VC-Dot 9',
+    'TILTFLEX',
+  ]},
+
+  // ── Chauvet Professional ─────────────────────────────────────────────────
+  {m:'Chauvet Professional',a:['chauvet','chauvet pro'],n:[
+    'Maverick MK1 Spot','Maverick MK1 Hybrid','Maverick MK1 Wash',
+    'Maverick MK2 Spot','Maverick MK2 Wash','Maverick MK2 Wash CX',
+    'Maverick MK3 Spot','Maverick MK3 Profile','Maverick MK3 Wash',
+    'Maverick Storm 2 BeamWash',
+    'Rogue R1 Spot','Rogue R1 Wash','Rogue R1 FX-B',
+    'Rogue R2 Spot','Rogue R2 Wash','Rogue R2 BeamWash',
+    'Rogue R3 Spot','Rogue R3 Wash','Rogue R3 BeamWash','Rogue R3X Wash',
+    'Rogue Outcast 2 Beam','Rogue Outcast 2 Wash',
+    'Ovation E-190WW','Ovation E-910FC','Ovation F-915FC','Ovation B-565FC',
+    'Intimidator Spot 475Z','Intimidator Hybrid 140SR',
+    'Colorado 2 Solo','Colorado 1 Solo',
+    'Nexus 4x4','Nexus Aw 7x7',
+    'Strike 4','Strike 1','Strike Array 2',
+  ]},
+
+  // ── ETC ──────────────────────────────────────────────────────────────────
+  {m:'ETC',a:['electronic theatre controls'],n:[
+    'Source Four','Source Four Jr',
+    'Source Four LED Series 2 Daylight HD','Source Four LED Series 2 Tungsten',
+    'Source Four LED Series 3 Lustr','Source Four LED Series 3 Daylight',
+    'Desire D40 Studio Spot','Desire D60 Vivid-R','Desire D22 Vivid-R',
+    'ColorSource Spot','ColorSource Spot jr','ColorSource Fresnel',
+    'ColorSource Linear 1','ColorSource Linear 2','ColorSource PAR',
+    'Lustr Array 2','Lustr X8',
+    'Selador Desire D40','Selador Vivid-R',
+    'CYC Tool','Echoflex',
+  ]},
+
+  // ── Ayrton ───────────────────────────────────────────────────────────────
+  {m:'Ayrton',n:[
+    'MagicBlade-R','MagicBlade-FX','MagicBlade-X',
+    'MagicDot-R','MagicDot-S','MagicDot-XT',
+    'MagicPanel-R','MagicPanel-602','MagicPanel-FX',
+    'MagicBeam','MagicBeam 2',
+    'NandoBeam S3','NandoBeam S6',
+    'Perseo Spot','Perseo Beam','Perseo Profile',
+    'Ghibli','Ghibli Profile',
+    'Mistral-TC','Mistral Profile-TC',
+    'Cobra','Cobra Profile',
+    'Diablo','Diablo Profile',
+    'Domino Aqua','Domino Profile',
+    'Khamsin','Khamsin Profile','Khamsin Aqua',
+    'Levante Profile',
+    'Merak','Merak Aqua',
+    'Karif Profile',
+    'Rivale Profile',
+    'Bax','Bax 360',
+    'Huracan Profile','Huracan Wash',
+    'Kyalami','Kyalami Profile',
+    'Zonda 1','Zonda 3','Zonda 3 FX','Zonda 6','Zonda 6 FX','Zonda 9',
+  ]},
+
+  // ── SGM ──────────────────────────────────────────────────────────────────
+  {m:'SGM',n:[
+    'G-7 Beam','G-7 Wash','G-7 Profile',
+    'G-Spot','G-Profile','G-Wash',
+    'X-5','X-5 Text',
+    'P-5','P-5 POI',
+    'P-2','P-6',
+    'Q-7',
+    'LB-160','SB-300','G-Cube',
+  ]},
+
+  // ── Vari-Lite ─────────────────────────────────────────────────────────────
+  {m:'Vari-Lite',a:['varilite','vari lite'],n:[
+    'VL3000 Spot','VL3000 Wash','VL3015LT Spot','VL3500 Wash',
+    'VL2600 Spot','VL2600 Profile','VL2600 Wash',
+    'VL4000 Spot','VL4000 BeamWash',
+    'VL2500 Spot','VL2500 Wash',
+    'VL6C','VL800 EventWash',
+    'VL10 BeamWash','VL10 Wash',
+    'VL1000 AS','VL1100 TSD',
+    'VL4K Wash','VL4K Spot',
+  ]},
+
+  // ── GLP ───────────────────────────────────────────────────────────────────
+  {m:'GLP',a:['german light products'],n:[
+    'impression X4','impression X4 Bar 10','impression X4 Bar 20','impression X4 S','impression X4 L',
+    'impression X5','impression X5 Wash','impression X5 Bar 20',
+    'impression FR10 Bar','impression FR1',
+    'JDC1','JDC Line',
+    'KNV Arc','KNV Cube','KNV Dot',
+    'X4 Bar 10','X4 Bar 20',
+    'GT-1','GT-1 Beam',
+    'Fusion Par FQ 16','Fusion Panel FQ 16',
+    'impression S350','impression E350',
+    'Highlander Compact','Highlander Profile',
+    'Ypoc Flex 16',
+  ]},
+
+  // ── Elation ───────────────────────────────────────────────────────────────
+  {m:'Elation',a:['elation professional'],n:[
+    'Artiste DaVinci','Artiste Mondrian','Artiste Picasso','Artiste Monet','Artiste Rembrandt','Artiste Camille',
+    'Fuze Profile','Fuze Wash Z350','Fuze Max Profile','Fuze Max Wash',
+    'Smarty Hybrid','Smarty Max',
+    'Proteus Maximus','Proteus Rayzor 760','Proteus Hybrid',
+    'SixPar 200','SixPar 300',
+    'Rayzor Q12','Rayzor 2 Crosshair',
+    'Cuepix Blinder WW4','Cuepix Panel WW',
+    'KL Panel 96','KL Fresnel 8',
+    'Paladin Panel',
+    'Dartz 360','Dartz 360 ST',
+  ]},
+
+  // ── Cameo ─────────────────────────────────────────────────────────────────
+  {m:'Cameo',a:['cameo light'],n:[
+    'ZENIT B200','ZENIT B200 IP',
+    'ZENIT W600','ZENIT W600 IP',
+    'ZENIT S30','ZENIT S40',
+    'Movo Beam Z100',
+    'Auro Spot Z300','Auro Spot 300 G2',
+    'Evos W7','Evos W5','Evos W4',
+    'Opus H5','Opus X Spot','Opus X Beam','Opus X Wash','Opus X Profile',
+    'F4 FC','F4 FC IP65',
+    'PIXBAR 600 PRO','PIXBAR 400 FC',
+    'D'AGE 18 FC','D'AGE 100',
+  ]},
+
+  // ── Astera ────────────────────────────────────────────────────────────────
+  {m:'Astera',a:['astera led technology'],n:[
+    'Titan Tube','Titan Tube Plus',
+    'Helios Tube',
+    'AX1 PixelTube','AX3 LightDrop','AX5 TriplePAR',
+    'Hydra Smart Light','NYX Bulb','FP5 FlexPin',
+    'Nanoline','Portable Charging Case',
+    'SkyPanel S60-C','SkyPanel S360-C',
+  ]},
+
+  // ── Robert Juliat ─────────────────────────────────────────────────────────
+  {m:'Robert Juliat',a:['rj','robert-juliat'],n:[
+    'Korrigan LT','Korrigan HC',
+    'Oz','Oz LT',
+    'Dalis 860','Dalis 862',
+    'Aledin 60 FC','Aledin 40',
+    'Victor','Arthur','Lancelot',
+    'Cézanne','Roxane','Roxane HC',
+    'Merlin','Tibo','Esprit',
+    'Sully','Lutin',
+  ]},
+
+  // ── Showtec ───────────────────────────────────────────────────────────────
+  {m:'Showtec',n:[
+    'Phantom 120 Spot','Phantom 65 Spot','Phantom 75 Beam','Phantom 130 Beam',
+    'Phantom 130 Profile',
+    'Cameleon Spot 7Q5','Cameleon Wash 7Q5',
+    'Infinity S521','Infinity iW-1915 Pixel',
+    'Spectral 3000 Q7',
+    'LED PAR 64 18x3W',
+  ]},
+
+  // ── Prolights ─────────────────────────────────────────────────────────────
+  {m:'Prolights',a:['pro lights'],n:[
+    'Stark 400Bwash','Stark 400Profile',
+    'Panorama IP','Panorama 300CW',
+    'Aero','ArcPar','ArcPar12Q4',
+    'LUMA 700H','LUMA 1000E',
+    'SmartBat CL','SmartBar 2',
+    'EclEdge PXL','EclPanel IP',
+  ]},
+
+  // ── LedJ ─────────────────────────────────────────────────────────────────
+  {m:'LEDJ',a:['ledj lighting','led j'],n:[
+    'Performer 18 MKII','Performer 12 HEX','Performer 7 HEX',
+    'TriPar 64','TriPar 38',
+    'Rapid 7 HEX','Rapid 10 HEX',
+    'CAMEO Pixbar','CAMEO ZENIT',
+  ]},
+
+  // ── JB-Lighting ───────────────────────────────────────────────────────────
+  {m:'JB-Lighting',a:['jb lighting'],n:[
+    'Sparx 7','Sparx 7 II','Sparx 10','Sparx MK2',
+    'P5','P12','P18',
+    'A7','A12',
+    'Varyscan P3','Varyscan P7',
+  ]},
+
+  // ── Claypaky (alias unificado arriba; esta entrada actúa de alias-only) ──
+  // Se elimina para unificar con Clay Paky — todo está en la entrada Clay Paky.
+
+  // ── Stairville (Thomann) ──────────────────────────────────────────────────
+  {m:'Stairville',n:[
+    'MH-X25 Beam','MH-X200 Beam',
+    'LED PAR 64 18x3W TCO','LED PAR 64 12x3W',
+    'CLB5 Flat Pro 7x12W','CLB5 Flat Pro 12x3W',
+    'SF-500 Followspot',
+  ]},
+
+  // ── Acme ──────────────────────────────────────────────────────────────────
+  {m:'Acme',a:['acme lighting'],n:[
+    'AX-5 Beam','AX-7 Beam','ACME iStar Beam',
+    'Xpot12 Beam','Xpot7 Beam',
+    'XP-800Z Profile',
+    'UV Cannon',
+  ]},
+
+  // ── Nicols ────────────────────────────────────────────────────────────────
+  {m:'Nicols',n:[
+    'Styx 300 SP','Styx 300 W',
+    'Cyclope 300 SP','Cyclope 300 B',
+    'Rocky 300 SP',
+  ]},
+
+  // ── Chroma-Q ──────────────────────────────────────────────────────────────
+  {m:'Chroma-Q',a:['chromaq','chroma q'],n:[
+    'Color Force II 12','Color Force II 48',
+    'Space Force 3','Space Force 6',
+    'Color One 100B','Color One 75',
+    'Color Charge','Space Charge',
+  ]},
+
+  // ── Rosco ─────────────────────────────────────────────────────────────────
+  {m:'Rosco',a:['rosco laboratories'],n:[
+    'Miro Cube WIM','Miro Cube 4C','Miro Cube 2C',
+    'Braq Cube 4C','Braq Cube WIM',
+    'LitePad','LitePad HO+ Daylight','LitePad Vector',
+  ]},
+
+  // ── Strand ────────────────────────────────────────────────────────────────
+  {m:'Strand',a:['strand lighting'],n:[
+    'SL NITRO 510C','SL NITRO 510',
+    'SL Fresnel 7','SL Leko','SL PAR',
+  ]},
+
+  // ── Philips Vari-Lite ─────────────────────────────────────────────────────
+  // (Vari-Lite is already listed above under its own brand)
+
+  // ── Lycian ────────────────────────────────────────────────────────────────
+  {m:'Lycian',n:['Trouper','Starklite','Automated Leko','m2 LED Spot']},
+
+  // ── PRG ───────────────────────────────────────────────────────────────────
+  {m:'PRG',a:['production resource group'],n:[
+    'Best Boy HP','Best Boy Spot','Best Boy LED',
+    'Bad Boy','Bad Boy HP','Mbox',
+  ]},
+
+  // ── Arri ──────────────────────────────────────────────────────────────────
+  {m:'Arri',a:['arri lighting'],n:[
+    'SkyPanel S60-C','SkyPanel S30-C','SkyPanel S120-C','SkyPanel S360-C',
+    'Orbiter','Orbiter Plus',
+    'L7-C','L5-C','L10-C',
+    'VariCool 2',
+  ]},
+
+  // ── Litepanels ────────────────────────────────────────────────────────────
+  {m:'Litepanels',a:['lite panels'],n:[
+    'Gemini 1x1','Gemini 2x1',
+    'Astra 6X Bi-Color','Astra 3X Bi-Color',
+    'Sola 4+','Sola 6+',
+    'Brick','Ringlite',
+  ]},
+
+  // ── Kino Flo ─────────────────────────────────────────────────────────────
+  {m:'Kino Flo',a:['kinoflo'],n:[
+    'Select 31 DMX','Select 20 DMX',
+    'Celeb 201 LED','Celeb 401 LED',
+    'Diva-Lite 21','Diva-Lite 31',
+    'FreeStyle 21 LED','FreeStyle 31 LED',
+  ]},
+
+  // ── Generic / Convencional ────────────────────────────────────────────────
+  {m:'Generic',a:['genérico','generico','convencional'],n:[
+    'PAR64','PAR56','PAR38','PAR 64','PAR 56','PAR 38',
+    'Fresnel','PC','Plano-convexo',
+    'Ellipsoidal','Profile Spot',
+    'Moving Head','Moving Head Beam','Moving Head Spot','Moving Head Wash','Moving Head Hybrid',
+    'LED Bar','LED Strip','LED Batten',
+    'Strobe','LED Strobe','Atomic Strobe',
+    'Dimmer','Dimmer Pack',
+    'Cyclorama','Cyc Light','LED Cyc',
+    'Blinder','LED Blinder',
+    'Followspot','Follow Spot',
+    'Sunstrips','Audience Blinder',
+    'UV Par','UV Bar',
+    'Hazer','Fogger','Haze Machine',
+    'PAR Can','LED PAR',
+  ]},
+];
+
+// ─── Build flat list with normalised name + manufacturer aliases ─────────────
+const ALLF=[];
+DB.forEach(entry=>{
+  entry.n.forEach(name=>{
+    ALLF.push({name, mfr:entry.m, normName:norm(name), normMfr:norm(entry.m), mfrAliases:(entry.a||[]).map(norm)});
+  });
+});
+
+// ─── Fuzzy fixture match ──────────────────────────────────────────────────────
+// Returns best match object or null
+function findFixture(rawQuery){
+  const q=norm(rawQuery);
+  // 1. Exact name match
+  let hit=ALLF.find(f=>f.normName===q);
+  if(hit)return hit;
+  // 2. Name contains query or query contains name
+  hit=ALLF.find(f=>f.normName.includes(q)||q.includes(f.normName));
+  if(hit)return hit;
+  // 3. All words in query present in name
+  const words=q.split(' ').filter(Boolean);
+  hit=ALLF.find(f=>words.every(w=>f.normName.includes(w)));
+  if(hit)return hit;
+  return null;
+}
+
+// ─── THEME ────────────────────────────────────────────────────────────────────
 const thmBtn=document.getElementById('thmBtn');
 let dark=true;
 thmBtn.addEventListener('click',()=>{
@@ -299,7 +663,7 @@ thmBtn.addEventListener('click',()=>{
     :'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
 });
 
-// TOAST
+// ─── TOAST ────────────────────────────────────────────────────────────────────
 function toast(msg,type='nfo',ms=3200){
   const c=document.getElementById('tw'),t=document.createElement('div');
   t.className=`toast ${type}`;t.textContent=msg;c.appendChild(t);
@@ -307,7 +671,7 @@ function toast(msg,type='nfo',ms=3200){
   setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),300);},ms);
 }
 
-// DROP ZONE
+// ─── DROP ZONE ────────────────────────────────────────────────────────────────
 const dz=document.getElementById('dz'),fi=document.getElementById('fi');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
 dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
@@ -385,7 +749,7 @@ async function renderPg(n){
   prevSec.querySelector('#np').disabled=n>=totPages;
 }
 
-// ANALYZE
+// ─── ANALYZE PDF ──────────────────────────────────────────────────────────────
 document.getElementById('btnAna').addEventListener('click',analyzePDF);
 
 async function analyzePDF(){
@@ -408,29 +772,34 @@ async function analyzePDF(){
 
   if(detected.length===0){toast('Sin fixtures conocidos en la leyenda. Añade manualmente.','wrn');}
   else{
-    toast(`${detected.length} fixture${detected.length>1?'s':'' } detectado${detected.length>1?'s':''}!`,'ok');
+    toast(`${detected.length} fixture${detected.length>1?'s':''} detectado${detected.length>1?'s':''}!`,'ok');
     renderList();renderResults();
   }
 }
 
 function extractFixtures(text){
   const found=new Map();
-  const up=text.toUpperCase();
-  ALLF.forEach(({name,mfr})=>{
-    const re=new RegExp('\\b'+name.toUpperCase().replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b');
-    if(re.test(up)){const k=mfr+':::'+name;if(!found.has(k))found.set(k,{name,mfr,src:'pdf'});}
+  const normText=norm(text);
+  ALLF.forEach(({name,mfr,normName})=>{
+    // Require word-boundary style: preceded/followed by non-alphanumeric (or start/end)
+    const escaped=normName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const re=new RegExp('(?<![a-z0-9])'+escaped+'(?![a-z0-9])');
+    if(re.test(normText)){
+      const k=mfr+':::'+name;
+      if(!found.has(k))found.set(k,{name,mfr,src:'pdf'});
+    }
   });
   return [...found.values()];
 }
 
-// MANUAL
+// ─── MANUAL ADD ───────────────────────────────────────────────────────────────
 document.getElementById('btnMan').addEventListener('click',doManual);
 document.getElementById('manIn').addEventListener('keydown',e=>{if(e.key==='Enter')doManual();});
 
 function doManual(){
   const v=document.getElementById('manIn').value.trim();
   if(!v){toast('Escribe el nombre','wrn');return;}
-  const hit=ALLF.find(f=>f.name.toLowerCase().includes(v.toLowerCase())||v.toLowerCase().includes(f.name.toLowerCase()));
+  const hit=findFixture(v);
   const fx=hit?{name:hit.name,mfr:hit.mfr,src:'manual'}:{name:v,mfr:'Unknown',src:'manual'};
   const k=fx.mfr+':::'+fx.name;
   if(detected.find(f=>f.mfr+':::'+f.name===k)||manual.find(f=>f.mfr+':::'+f.name===k)){toast('Ya está en la lista','nfo');return;}
@@ -440,7 +809,7 @@ function doManual(){
   toast(`"${fx.name}" añadido`,'ok');
 }
 
-// CONSOLE CHIPS
+// ─── CONSOLE CHIPS ────────────────────────────────────────────────────────────
 document.querySelectorAll('.chip').forEach(c=>{
   c.addEventListener('click',()=>{
     const id=c.dataset.c;
@@ -450,7 +819,7 @@ document.querySelectorAll('.chip').forEach(c=>{
   });
 });
 
-// SEARCH
+// ─── SEARCH ───────────────────────────────────────────────────────────────────
 document.getElementById('srch').addEventListener('input',e=>{
   query=e.target.value.trim();
   document.getElementById('srchClr').classList.toggle('on',query.length>0);
@@ -500,12 +869,19 @@ function renderResults(){
 
   let filtered=[...all];
   if(query){
-    const ql=query.toLowerCase();
-    filtered=all.filter(f=>f.name.toLowerCase().includes(ql)||f.mfr.toLowerCase().includes(ql));
+    const ql=norm(query);
+    filtered=all.filter(f=>norm(f.name).includes(ql)||norm(f.mfr).includes(ql));
     if(!filtered.length){
       const sr=[];
-      ALLF.forEach(f=>{if(f.name.toLowerCase().includes(ql)||f.mfr.toLowerCase().includes(ql))sr.push({...f,src:'search'});});
-      filtered=sr.slice(0,12);
+      ALLF.forEach(f=>{
+        const fn=f.normName,fm=f.normMfr;
+        const words=ql.split(' ').filter(Boolean);
+        if(fn.includes(ql)||fm.includes(ql)||words.every(w=>fn.includes(w)||fm.includes(w)))
+          sr.push({name:f.name,mfr:f.mfr,src:'search'});
+      });
+      // dedup
+      const seen=new Set();
+      filtered=sr.filter(f=>{const k=f.mfr+':::'+f.name;if(seen.has(k))return false;seen.add(k);return true;}).slice(0,16);
     }
   }
 
@@ -517,7 +893,7 @@ function renderResults(){
     html+='<div class="grid">';
     filtered.forEach((f,i)=>{
       const L=links(f);
-      const badge=f.src==='pdf'?'<span class="card-src src-p">PDF</span>':f.src==='manual'?'<span class="card-src src-m">Manual</span>':''
+      const badge=f.src==='pdf'?'<span class="card-src src-p">PDF</span>':f.src==='manual'?'<span class="card-src src-m">Manual</span>':'';
       let ls='';
       if(consoles.has('ma2'))ls+=`<a class="lnk ma2" href="${L.ma2}" target="_blank" rel="noopener noreferrer"><span class="lnk-dot"></span><span class="lnk-lbl">grandMA2 FixtureShare</span>${EXT_ICO}</a>`;
       if(consoles.has('ma3'))ls+=`<a class="lnk ma3" href="${L.ma3}" target="_blank" rel="noopener noreferrer"><span class="lnk-dot"></span><span class="lnk-lbl">grandMA3 / GDTF Share</span>${EXT_ICO}</a>`;
