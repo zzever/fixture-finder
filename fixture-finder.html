@@ -18,11 +18,11 @@
 --r2:8px;--r3:12px;
 --sh1:0 1px 3px rgba(0,0,0,.4);--sh2:0 4px 16px rgba(0,0,0,.5);--sh3:0 12px 40px rgba(0,0,0,.6);
 --fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;
---tx:clamp(.75rem,.7rem+.25vw,.875rem);
---ts:clamp(.8rem,.75rem+.25vw,.9rem);
---tb:clamp(.9rem,.85rem+.25vw,1rem);
---tl:clamp(1rem,.9rem+.5vw,1.25rem);
---txl:clamp(1.2rem,1rem+1vw,1.6rem);
+--tx:clamp(.75rem,.7rem + .25vw,.875rem);
+--ts:clamp(.8rem,.75rem + .25vw,.9rem);
+--tb:clamp(.9rem,.85rem + .25vw,1rem);
+--tl:clamp(1rem,.9rem + .5vw,1.25rem);
+--txl:clamp(1.2rem,1rem + 1vw,1.6rem);
 --tr:180ms cubic-bezier(.16,1,.3,1);
 }
 [data-theme="light"]{
@@ -241,7 +241,12 @@ mark{background:rgba(245,166,35,.25);color:var(--warn);border-radius:2px;padding
 </div>
 <div class="toast-wrap" id="tw"></div>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+var PDFJS_OK=typeof pdfjsLib!=='undefined';
+if(PDFJS_OK){
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}else{
+  console.warn('pdf.js no disponible: las funciones de PDF quedan desactivadas');
+}
 var pdfDoc=null,curPage=1,totPages=0,prevSec=null,cvs=null;
 var detected=[],manual=[];
 var consoles=new Set(['ma2','ma3','avo','gdtf']);
@@ -452,12 +457,12 @@ fi.addEventListener('change',function(e){if(e.target.files[0])loadPDF(e.target.f
 document.getElementById('rmv').addEventListener('click',clearPDF);
 
 function loadPDF(file){
+  if(!PDFJS_OK){toast('No se pudo cargar el lector de PDF. La busqueda manual sigue disponible.','wrn');return;}
   document.getElementById('pn').textContent=file.name;
   document.getElementById('pm').textContent=Math.round(file.size/1024)+' KB';
   document.getElementById('pinfoWrap').style.display='';
   dz.style.display='none';
   document.getElementById('btnAna').disabled=false;
-  var buf;
   file.arrayBuffer().then(function(b){
     return pdfjsLib.getDocument({data:b}).promise;
   }).then(function(doc){
@@ -465,7 +470,13 @@ function loadPDF(file){
     document.getElementById('pm').textContent=Math.round(file.size/1024)+' KB - '+totPages+' pag.';
     showPreview();
     toast('PDF cargado: '+totPages+' pagina'+(totPages>1?'s':''),'ok');
-  }).catch(function(e){toast('Error al leer PDF: '+e.message,'wrn');});
+  }).catch(function(e){
+    pdfDoc=null; fi.value='';
+    document.getElementById('pinfoWrap').style.display='none';
+    dz.style.display='';
+    document.getElementById('btnAna').disabled=true;
+    toast('Error al leer PDF: '+e.message,'wrn');
+  });
 }
 
 function clearPDF(){
@@ -539,6 +550,9 @@ function analyzePDF(){
       return p.getTextContent();
     }).then(function(tc){
       txt+=tc.items.map(function(x){return x.str;}).join(' ')+'\n';
+    }).catch(function(e){
+      console.warn('No se pudo leer la pagina '+pg,e);
+    }).then(function(){
       done++;
       pf.style.width=(done/totPages*100)+'%';
       next();
@@ -602,6 +616,10 @@ document.getElementById('srchClr').addEventListener('click',function(){
   renderResults();
 });
 
+function fxKey(f){
+  return 'c-'+norm(f.mfr+' '+f.name).replace(/[^a-z0-9]+/g,'-');
+}
+
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function hl(s){
   if(!query)return s;
@@ -632,8 +650,9 @@ function renderList(){
     el.innerHTML='<span class="fxtag-n">'+esc(f.name)+'</span><span class="fxtag-m">'+esc(f.mfr)+'</span><span class="fxtag-b">'+(f.src==='pdf'?'PDF':'Manual')+'</span>';
     el.addEventListener('click',function(){
       el.classList.toggle('on');
-      var c=document.getElementById('c'+i);
+      var c=document.getElementById(fxKey(f));
       if(c)c.scrollIntoView({behavior:'smooth',block:'center'});
+      else toast('"'+f.name+'" no esta en los resultados actuales','nfo');
     });
     lst.appendChild(el);
   });
@@ -680,7 +699,7 @@ function renderResults(){
       }
       if(consoles.has('gdtf'))ls+='<a class="lnk gdtf" href="'+L.gdtf+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">GDTF Share (universal)</span>'+EXT+'</a>';
       if(!ls)ls='<span style="font-size:10px;color:var(--faint);padding:4px">Selecciona al menos una consola</span>';
-      html+='<div class="card" id="c'+i+'">';
+      html+='<div class="card" id="'+fxKey(f)+'">';
       html+='<div class="card-h"><div class="card-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="10" r="4"/><path d="M12 14v5M8 22h8M6 7l2 2M18 7l-2 2"/></svg></div>';
       html+='<div><div class="card-n">'+hl(esc(f.name))+'</div><div class="card-m">'+hl(esc(f.mfr))+'</div></div>'+badge+'</div>';
       html+='<div class="card-l">'+ls+'</div></div>';
