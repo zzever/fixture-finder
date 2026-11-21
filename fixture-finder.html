@@ -945,10 +945,12 @@ var GSERVER=false;
   fetch('/api/health',{cache:'no-store'}).then(function(r){
     return r.ok?r.json():null;
   }).then(function(j){
-    if(!j||!j.serverKey)return;
+    if(!j||!j.ok)return;
+    // Hay backend: la clave vive solo ahi, el navegador nunca la pide.
     GSERVER=true;
     var row=document.getElementById('gkeyRow');if(row)row.style.display='none';
-    gstat('Clave configurada en el servidor: no hace falta pegar la tuya','ok');
+    if(j.serverKey)gstat('Clave configurada en el servidor: no hace falta pegar la tuya','ok');
+    else gstat('Falta configurar GEMINI_API_KEY en el servidor','err');
   }).catch(function(){});
 })();
 document.getElementById('gkeyBtn').addEventListener('click',function(){
