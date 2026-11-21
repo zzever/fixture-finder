@@ -3,3 +3,6 @@ deploy-public/
 node_modules/
 .env
 .dev.vars
+.gemini-key
+*.key
+secret.gemini-key.txt

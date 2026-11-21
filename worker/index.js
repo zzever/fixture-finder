@@ -174,6 +174,7 @@ function handleJobs(request) {
 }
 
 function handleFeed(request) {
+  const base = new URL(request.url).origin;
   const cors = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, OPTIONS', 'access-control-allow-headers': 'content-type' };
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
   if (request.method !== 'GET' && request.method !== 'HEAD') return j(405, { ok: false, error: 'Metodo no permitido' });
@@ -183,11 +184,11 @@ function handleFeed(request) {
   xml += '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n';
   xml += '<channel>\n';
   xml += '<title>Empleo espectaculos y eventos - Fixture Finder</title>\n';
-  xml += '<link>https://fixture-finder-kcsd30-preview.freebuff.site/</link>\n';
+  xml += '<link>' + escXml(base + '/') + '</link>\n';
   xml += '<description>Ofertas de empleo del sector espectaculos, eventos, iluminacion y audiovisual en Espana.</description>\n';
   xml += '<language>es</language>\n';
   xml += '<lastBuildDate>' + now + '</lastBuildDate>\n';
-  xml += '<atom:link href="https://fixture-finder-kcsd30-preview.freebuff.site/api/feed" rel="self" type="application/rss+xml"/>\n';
+  xml += '<atom:link href="' + escXml(base + '/api/feed') + '" rel="self" type="application/rss+xml"/>\n';
   list.forEach(function (j) {
     xml += '<item>\n';
     xml += '<title>' + escXml(j.title + ' - ' + j.company) + '</title>\n';
