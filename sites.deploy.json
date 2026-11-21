@@ -3,7 +3,8 @@
   "compatibilityDate": "2026-11-01",
   "modules": [
     { "name": "worker/index.js", "type": "esm", "path": "./worker/index.js" },
-    { "name": "prompt.js", "type": "esm", "path": "./prompt.js" }
+    { "name": "prompt.js", "type": "esm", "path": "./prompt.js" },
+    { "name": "jobs.js", "type": "esm", "path": "./jobs.js" }
   ],
   "assetsDirectory": "./deploy-public",
   "spa": true

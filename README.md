@@ -15,3 +15,14 @@ Convierte un GDTF a `.qlablight` con la clave de Gemini guardada como secreto de
 El prompt GDTF → QLab está en `prompt.js` y es el mismo para el navegador y el Worker (que lo importa como módulo ESM declarado en `sites.deploy.json`).
 
 Desplegar: `bash build-sites.sh` (arma `deploy-public/`, ignorado por git) y luego desplegar con el manifiesto `sites.deploy.json`.
+
+## Empleo (ofertas del sector espectaculos y eventos)
+
+La web incluye una vista "Empleo" con ofertas curadas para tecnico de iluminacion /
+spectaculos / audiovisual en Espana (datos en `jobs.js`, compartidos por el navegador y
+el Worker). El Worker expone un feed RSS 2.0 y JSON para apps externas:
+
+- `GET /api/feed` (alias `/feed.xml`, `/rss.xml`) -> RSS 2.0 (`application/rss+xml`)
+- `GET /api/jobs` (alias `/jobs.json`) -> JSON `{ ok, count, items }`
+
+Ambos endpoints tienen CORS abierto para consumo desde apps externas.

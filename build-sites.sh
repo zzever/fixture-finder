@@ -12,6 +12,7 @@ cp fixture-finder.html "$out/fixture-finder.html"
 cp fixture-finder.html "$out/index.html"
 cp drive-index.js "$out/drive-index.js"
 cp prompt.js "$out/prompt.js"
+cp jobs.js "$out/jobs.js"
 
 echo "assets: $(ls -1 "$out" | tr '\n' ' ')"
 echo "worker: $(wc -c < worker/index.js) bytes"
