@@ -10,6 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="drive-index.js"></script>
+<script src="prompt.js"></script>
 <style>
 :root,[data-theme="dark"]{
 --bg:#0d0e11;--sur:#13151a;--sur2:#181b22;--suroff:#1e2230;
@@ -263,7 +264,7 @@ mark{background:rgba(245,166,35,.25);color:var(--warn);border-radius:2px;padding
         <input type="file" id="gtpl" accept=".qlablight,.json">
         <div class="dz-t" id="gtplN">Plantilla .qlablight (opcional)</div>
       </label>
-      <div class="man-add">
+      <div class="man-add" id="gkeyRow">
         <input type="password" id="gkey" placeholder="Clave API de Gemini" autocomplete="off">
         <button class="btnadd" id="gkeyBtn">Guardar</button>
       </div>
@@ -928,7 +929,7 @@ function gstat(msg,type){
   var el=document.getElementById('gStat');
   if(!el)return;
   el.textContent=msg||'';
-  el.style.color=type==='err'?'var(--err)':type==='ok'?'var(--ok)':'var(--muted)';
+  el.style.color=type==='err'?'var(--err)':type==='ok'?'var(--ok)':type==='wrn'?'var(--warn)':'var(--muted)';
 }
 (function(){
   try{
@@ -937,6 +938,18 @@ function gstat(msg,type){
       gstat('Clave de Gemini guardada en este navegador');
     }
   }catch(e){}
+})();
+// Si el sitio corre con backend (worker con GEMINI_API_KEY), no hace falta clave en el navegador.
+var GSERVER=false;
+(function(){
+  fetch('/api/health',{cache:'no-store'}).then(function(r){
+    return r.ok?r.json():null;
+  }).then(function(j){
+    if(!j||!j.serverKey)return;
+    GSERVER=true;
+    var row=document.getElementById('gkeyRow');if(row)row.style.display='none';
+    gstat('Clave configurada en el servidor: no hace falta pegar la tuya','ok');
+  }).catch(function(){});
 })();
 document.getElementById('gkeyBtn').addEventListener('click',function(){
   var i=document.getElementById('gkey'),v=i.value.trim();
@@ -979,13 +992,10 @@ document.getElementById('gtpl').addEventListener('change',function(e){
     gstat('Plantilla cargada: Gemini copiara su estructura','ok');
   });
 });
+// El prompt vive en prompt.js (mismo archivo que usa el Worker).
 function geminiPrompt(){
-  var p='Converti esta definicion de fixture GDTF en una definicion de instrumento de QLab 5, es decir un archivo .qlablight en JSON.\n'
-    +'Reglas: una sola definicion con nombre unico y fabricante; parametros en el orden de los canales DMX del modo elegido; para cada parametro indica nombre, canal DMX y si usa 16 bits; elegi el modo DMX "Standard" o el primero disponible y reflejalo en el nombre.\n'
-    +'Responde SOLO con el JSON valido, sin markdown y sin explicaciones.\n';
-  if(tplJson)p+='\nIMPORTANTE: copia exactamente la estructura, las claves y los tipos de esta plantilla .qlablight real y solo reemplaza los valores:\n<<<PLANTILLA\n'+tplJson.slice(0,20000)+'\nPLANTILLA>>>\n';
-  p+='\nDefinicion GDTF (description.xml):\n<<<GDTF\n'+gdtfXml.slice(0,60000)+'\nGDTF>>>';
-  return p;
+  if(typeof window.FF_PROMPT!=='function')return '';
+  return window.FF_PROMPT(gdtfXml,tplJson,gdtfName||'');
 }
 function copyText(t){
   if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t);
@@ -1003,31 +1013,55 @@ document.getElementById('gprompt').addEventListener('click',function(){
     toast('Prompt copiado: pegalo en Gemini','ok');gstat('Prompt copiado al portapapeles','ok');
   },function(){gstat('No se pudo copiar el prompt','err');});
 });
-document.getElementById('gconv').addEventListener('click',function(){
-  if(!gdtfXml){gstat('Carga primero un .gdtf o su description.xml','err');return;}
-  var key=(document.getElementById('gkey').value||'').trim();
-  if(!key){try{key=localStorage.getItem(GKEY)||'';}catch(e){}}
-  if(!key){gstat('Falta la clave de Gemini (se guarda solo en tu navegador)','err');return;}
-  var b=this;b.disabled=true;gstat('Consultando a Gemini...');
-  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',{
+// Un solo flujo de conversion: backend si existe, si no la clave del navegador.
+var GURL='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+function readJson(r,label){
+  return r.json().catch(function(){throw new Error(label+': respuesta invalida');}).then(function(j){
+    if(!r.ok)throw new Error(label+': '+((j&&(j.error&&j.error.message||j.error))||('HTTP '+r.status)));
+    return j;
+  });
+}
+function qlabRequest(key){
+  if(GSERVER){
+    return fetch('/api/qlab',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({gdtf:gdtfXml,template:tplJson||'',name:gdtfName||''})
+    }).then(function(r){return readJson(r,'Servidor');}).then(function(j){
+      if(!j.ok)throw new Error('Servidor: '+(j.error||'respuesta invalida'));
+      return {text:j.qlab!==undefined?JSON.stringify(j.qlab):(j.text||''),warn:j.warning||''};
+    });
+  }
+  return fetch(GURL,{
     method:'POST',
     headers:{'Content-Type':'application/json','x-goog-api-key':key},
     body:JSON.stringify({contents:[{parts:[{text:geminiPrompt()}]}],generationConfig:{temperature:0.2,responseMimeType:'application/json'}})
-  }).then(function(r){
-    return r.json().then(function(j){
-      if(!r.ok)throw new Error((j.error&&j.error.message)||('HTTP '+r.status));
-      return j;
-    });
-  }).then(function(j){
+  }).then(function(r){return readJson(r,'Gemini');}).then(function(j){
     var parts=(j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts)||[];
     var t=parts.map(function(x){return x.text||'';}).join('');
-    if(!t)throw new Error('respuesta vacia');
-    showQlab(t);
-    gstat('JSON generado: revisalo antes de importarlo en QLab','ok');
+    if(!t)throw new Error('Gemini: respuesta vacia');
+    return {text:t,warn:''};
+  });
+}
+function convert(b){
+  if(!gdtfXml){gstat('Carga primero un .gdtf o su description.xml','err');return;}
+  var key='';
+  if(!GSERVER){
+    if(typeof window.FF_PROMPT!=='function'){gstat('No se pudo cargar prompt.js','err');return;}
+    key=(document.getElementById('gkey').value||'').trim();
+    if(!key){try{key=localStorage.getItem(GKEY)||'';}catch(e){}}
+    if(!key){gstat('Falta la clave de Gemini (se guarda solo en tu navegador)','err');return;}
+  }
+  b.disabled=true;gstat(GSERVER?'Consultando al servidor...':'Consultando a Gemini...');
+  qlabRequest(key).then(function(res){
+    showQlab(res.text);
+    gstat(res.warn?res.warn+': revisalo antes de importarlo en QLab':'JSON generado: revisalo antes de importarlo en QLab',res.warn?'wrn':'ok');
   }).catch(function(err){
-    gstat('Error: '+err.message,'err');toast('Gemini: '+err.message,'wrn');
+    var msg=err.message.replace(/^(Servidor|Gemini): /,'');
+    gstat('Error: '+msg,'err');
+    toast(msg,'wrn');
   }).then(function(){b.disabled=false;});
-});
+}
+document.getElementById('gconv').addEventListener('click',function(){convert(this);});
 function showQlab(t){
   var ta=document.getElementById('ovTa');
   try{ta.value=JSON.stringify(JSON.parse(t),null,2);}catch(e){ta.value=t;}
