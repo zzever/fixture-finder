@@ -12,6 +12,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="drive-index.js"></script>
 <script src="prompt.js"></script>
+<script src="jobs.js"></script>
 <style>
 :root,[data-theme="dark"]{
 --bg:#0d0e11;--sur:#13151a;--sur2:#181b22;--suroff:#1e2230;
@@ -168,6 +169,20 @@ mark{background:rgba(245,166,35,.25);color:var(--warn);border-radius:2px;padding
 .qty{font-family:var(--fm);font-size:9px;font-weight:700;color:var(--pri);background:var(--prihlt);border:1px solid rgba(74,158,255,.3);border-radius:999px;padding:1px 7px;white-space:nowrap;margin-left:.4rem}
 .pstat{font-size:10px;color:var(--muted);font-family:var(--fm);margin-top:.35rem;display:none}
 @media(max-width:860px){.side{max-height:none;border-right:0;border-bottom:1px solid var(--brd)}.con{max-height:none}}
+.job{background:var(--sur2);border:1px solid var(--brd);border-radius:var(--r3);padding:1rem;margin-bottom:.75rem}
+.job-h{display:flex;align-items:flex-start;gap:.6rem;margin-bottom:.5rem;flex-wrap:wrap}
+.job-t{font-weight:600;font-size:var(--ts);color:var(--txt);flex:1;min-width:0}
+.job-co{font-size:var(--tx);color:var(--muted)}
+.job-meta{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0;font-size:var(--tx);color:var(--muted)}
+.job-tag{font-family:var(--fm);font-size:9px;padding:2px 7px;border-radius:999px;border:1px solid var(--brd);background:var(--suroff);color:var(--muted)}
+.job-tag.encaje-alto{color:var(--ok);border-color:rgba(61,220,132,.3);background:rgba(61,220,132,.08)}
+.job-tag.encaje-medio{color:var(--warn);border-color:rgba(245,166,35,.3);background:rgba(245,166,35,.08)}
+.job-tag.encaje-bajo{color:var(--err);border-color:rgba(232,64,64,.3);background:rgba(232,64,64,.08)}
+.job-sum{font-size:var(--tx);color:var(--muted);line-height:1.5;margin:.4rem 0}
+.job-lnk{display:inline-flex;align-items:center;gap:.3rem;font-size:var(--tx);color:var(--pri);text-decoration:none;margin-top:.4rem}
+.job-filters{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0}
+.job-chip{padding:.35rem .7rem;border-radius:999px;border:1px solid var(--brd);background:var(--suroff);color:var(--muted);font-size:var(--tx);cursor:pointer}
+.job-chip.on{background:var(--prihlt);color:var(--pri);border-color:rgba(74,158,255,.4)}
 </style>
 </head>
 <body>
@@ -185,6 +200,7 @@ mark{background:rgba(245,166,35,.25);color:var(--warn);border-radius:2px;padding
       <div class="logo-s">MA2 &middot; MA3 &middot; AVOLITES &middot; GDTF</div>
     </div>
   </div>
+  <button class="btnadd" id="jobsBtn" style="margin-right:.5rem">Empleo</button>
   <button class="thmbtn" id="thmBtn" aria-label="Cambiar tema">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
   </button>
@@ -284,6 +300,7 @@ mark{background:rgba(245,166,35,.25);color:var(--warn);border-radius:2px;padding
     </div>
   </aside>
   <main class="con" id="con">
+    <div id="viewLib">
     <div class="welcome" id="wel">
       <svg class="welcome-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="10" r="5"/><path d="M12 15v4M7 22h10M4 7l3 3M20 7l-3 3M2 22l3-4h14l3 4"/></svg>
       <h2>Fixture Library Finder</h2>
@@ -295,6 +312,17 @@ mark{background:rgba(245,166,35,.25);color:var(--warn);border-radius:2px;padding
       </div>
     </div>
     <div id="res" style="display:none"></div>
+    </div>
+    <div id="viewJobs" style="display:none">
+      <div class="rh"><div class="rh-t">Empleo &middot; espectaculos y eventos</div><div class="rh-c" id="jobsCnt">0 ofertas</div></div>
+      <div class="job-filters" id="jobFilters"></div>
+      <div class="job-search" style="margin:.5rem 0"><input type="text" id="jobSrch" placeholder="Filtrar por puesto, empresa, ciudad..." style="width:100%"></div>
+      <div id="jobsList"></div>
+      <div style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <a class="btnadd" href="/api/feed" target="_blank" rel="noopener">RSS feed (app externa)</a>
+        <a class="btnadd" href="/api/jobs" target="_blank" rel="noopener">JSON</a>
+      </div>
+    </div>
   </main>
 </div>
 </div>
@@ -1197,6 +1225,62 @@ document.getElementById('ovDl').addEventListener('click',function(){
   setTimeout(function(){URL.revokeObjectURL(a.href);},1500);
   toast('Descargado '+a.download,'ok');
 });
+// ---- Empleo (ofertas del sector espectaculos y eventos) ----
+var JOB_CAT_LABELS={ilum:'Iluminacion',prod:'Produccion',av:'Audiovisual',pub:'Empleo publico',escal:'Escalada'};
+var jobCat='all',jobQ='';
+function encajeClass(e){return 'encaje-'+String(e||'').toLowerCase().replace(/[^a-z]/g,'');}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escAttr(s){return esc(s).replace(/"/g,'&quot;');}
+function renderJobFilters(){
+  var el=document.getElementById('jobFilters');
+  var cats=['all'].concat(Object.keys(JOB_CAT_LABELS));
+  el.innerHTML=cats.map(function(c){
+    var label=c==='all'?'Todos':JOB_CAT_LABELS[c];
+    return '<button class="job-chip'+(jobCat===c?' on':'')+'" data-cat="'+c+'">'+label+'</button>';
+  }).join('');
+  el.querySelectorAll('.job-chip').forEach(function(b){
+    b.addEventListener('click',function(){jobCat=b.getAttribute('data-cat');renderJobFilters();renderJobs();});
+  });
+}
+function renderJobs(){
+  var list=(window.FF_JOBS||[]);
+  var q=jobQ.trim().toLowerCase();
+  var filtered=list.filter(function(j){
+    if(jobCat!=='all' && j.cat!==jobCat)return false;
+    if(!q)return true;
+    return (j.title+' '+j.company+' '+j.location+' '+(j.tech||'')+' '+(j.summary||'')).toLowerCase().indexOf(q)>=0;
+  });
+  document.getElementById('jobsCnt').textContent=filtered.length+' oferta'+(filtered.length!==1?'s':'');
+  var html='';
+  filtered.forEach(function(j){
+    html+='<div class="job">';
+    html+='<div class="job-h"><div class="job-t">'+esc(j.title)+'</div><span class="job-tag '+encajeClass(j.encaje)+'">'+esc(j.encaje)+'</span></div>';
+    html+='<div class="job-co">'+esc(j.company)+' &middot; '+esc(j.location)+'</div>';
+    html+='<div class="job-meta">';
+    html+='<span class="job-tag">'+esc(j.modality)+'</span>';
+    html+='<span class="job-tag">'+esc(j.contract)+'</span>';
+    if(j.published)html+='<span class="job-tag">'+esc(j.published)+'</span>';
+    if(j.salary && j.salary!=='No especificado')html+='<span class="job-tag">'+esc(j.salary)+'</span>';
+    html+='</div>';
+    if(j.tech)html+='<div class="job-meta"><span class="job-tag">Tech: '+esc(j.tech)+'</span></div>';
+    html+='<div class="job-sum">'+esc(j.summary)+'</div>';
+    html+='<a class="job-lnk" href="'+escAttr(j.url)+'" target="_blank" rel="noopener">Abrir oferta &rarr;</a>';
+    html+='</div>';
+  });
+  if(!filtered.length)html='<div class="welcome" style="min-height:120px"><p>Sin ofertas para este filtro.</p></div>';
+  document.getElementById('jobsList').innerHTML=html;
+}
+document.getElementById('jobSrch').addEventListener('input',function(){jobQ=this.value;renderJobs();});
+document.getElementById('jobsBtn').addEventListener('click',function(){
+  var lib=document.getElementById('viewLib'),jb=document.getElementById('viewJobs');
+  var showing=jb.style.display!=='none';
+  lib.style.display=showing?'':'none';
+  jb.style.display=showing?'none':'';
+  this.textContent=showing?'Empleo':'Librerias';
+  if(!showing){renderJobFilters();renderJobs();}
+});
+renderJobFilters();
+renderJobs();
 </script>
 </body>
 </html>

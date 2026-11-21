@@ -4,6 +4,7 @@
 // La clave nunca llega al navegador.
 
 import '../prompt.js';
+import '../jobs.js';
 
 const MODEL = 'gemini-2.5-flash';
 const MAX_GDTF = 80000;
@@ -20,6 +21,11 @@ const SYS = 'Sos un conversor tecnico de definiciones de fixtures de iluminacion
 // prompt.js define globalThis.FF_PROMPT; el navegador carga el mismo archivo como script.
 function promptBuilder() {
   return typeof globalThis.FF_PROMPT === 'function' ? globalThis.FF_PROMPT : null;
+}
+
+// jobs.js define globalThis.FF_JOBS (ofertas de empleo del sector).
+function jobs() {
+  return Array.isArray(globalThis.FF_JOBS) ? globalThis.FF_JOBS : [];
 }
 
 const HEADERS = {
@@ -143,6 +149,61 @@ async function handleQlab(request, env) {
   return j(200, { ok: true, text: parsed.text, warning: 'La respuesta no es JSON valido', model: MODEL });
 }
 
+function escXml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
+
+function parseJobDate(s) {
+  var m = String(s || '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!m) return null;
+  var d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+  return isNaN(d.getTime()) ? null : d.toUTCString();
+}
+
+function handleJobs(request) {
+  const cors = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, OPTIONS', 'access-control-allow-headers': 'content-type' };
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+  if (request.method !== 'GET' && request.method !== 'HEAD') return j(405, { ok: false, error: 'Metodo no permitido' });
+  const list = jobs();
+  if (request.method === 'HEAD') return new Response(null, { status: 200, headers: Object.assign({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=300' }, cors) });
+  return new Response(JSON.stringify({ ok: true, count: list.length, items: list }), {
+    status: 200, headers: Object.assign({ 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=300', 'x-content-type-options': 'nosniff' }, cors)
+  });
+}
+
+function handleFeed(request) {
+  const cors = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, OPTIONS', 'access-control-allow-headers': 'content-type' };
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+  if (request.method !== 'GET' && request.method !== 'HEAD') return j(405, { ok: false, error: 'Metodo no permitido' });
+  const list = jobs();
+  const now = new Date().toUTCString();
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n';
+  xml += '<channel>\n';
+  xml += '<title>Empleo espectaculos y eventos - Fixture Finder</title>\n';
+  xml += '<link>https://fixture-finder-kcsd30-preview.freebuff.site/</link>\n';
+  xml += '<description>Ofertas de empleo del sector espectaculos, eventos, iluminacion y audiovisual en Espana.</description>\n';
+  xml += '<language>es</language>\n';
+  xml += '<lastBuildDate>' + now + '</lastBuildDate>\n';
+  xml += '<atom:link href="https://fixture-finder-kcsd30-preview.freebuff.site/api/feed" rel="self" type="application/rss+xml"/>\n';
+  list.forEach(function (j) {
+    xml += '<item>\n';
+    xml += '<title>' + escXml(j.title + ' - ' + j.company) + '</title>\n';
+    xml += '<link>' + escXml(j.url) + '</link>\n';
+    xml += '<guid isPermaLink="true">' + escXml(j.url) + '</guid>\n';
+    var pd = parseJobDate(j.published);
+    if (pd) xml += '<pubDate>' + pd + '</pubDate>\n';
+    xml += '<category>' + escXml(j.cat) + '</category>\n';
+    xml += '<description>' + escXml((j.summary || '') + ' | Ubicacion: ' + (j.location || '') + ' | Contrato: ' + (j.contract || '') + ' | Salario: ' + (j.salary || '') + ' | Encaje: ' + (j.encaje || '') + ' | Tecnologias: ' + (j.tech || '')) + '</description>\n';
+    xml += '</item>\n';
+  });
+  xml += '</channel>\n</rss>\n';
+  if (request.method === 'HEAD') return new Response(null, { status: 200, headers: Object.assign({ 'content-type': 'application/rss+xml; charset=utf-8', 'cache-control': 'public, max-age=300' }, cors) });
+  return new Response(xml, { status: 200, headers: Object.assign({ 'content-type': 'application/rss+xml; charset=utf-8', 'cache-control': 'public, max-age=300', 'x-content-type-options': 'nosniff' }, cors) });
+}
+
 export default {
   async fetch(request, env) {
     let url;
@@ -157,6 +218,12 @@ export default {
       if (url.pathname === '/api/qlab') {
         if (request.method !== 'POST') return j(405, { ok: false, error: 'Metodo no permitido' });
         return await handleQlab(request, env);
+      }
+      if (url.pathname === '/api/jobs' || url.pathname === '/jobs.json') {
+        return handleJobs(request);
+      }
+      if (url.pathname === '/api/feed' || url.pathname === '/feed.xml' || url.pathname === '/rss.xml') {
+        return handleFeed(request);
       }
       if (url.pathname.indexOf('/api/') === 0) return j(404, { ok: false, error: 'No existe' });
 
