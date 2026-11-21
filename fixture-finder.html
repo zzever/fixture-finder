@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300..700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="drive-index.js"></script>
 <style>
 :root,[data-theme="dark"]{
 --bg:#0d0e11;--sur:#13151a;--sur2:#181b22;--suroff:#1e2230;
@@ -82,6 +83,7 @@ input{cursor:text}
 .chip[data-c="ma3"]{border-color:var(--ma3);color:var(--ma3)}.chip[data-c="ma3"].on{background:var(--ma3);color:#000}
 .chip[data-c="avo"]{border-color:var(--avo);color:var(--avo)}.chip[data-c="avo"].on{background:var(--avo);color:#fff}
 .chip[data-c="gdtf"]{border-color:var(--gdtf);color:var(--gdtf)}.chip[data-c="gdtf"].on{background:var(--gdtf);color:#fff}
+.chip[data-c="drive"]{border-color:var(--pri);color:var(--pri)}.chip[data-c="drive"].on{background:var(--pri);color:#fff}
 .fxlist{display:flex;flex-direction:column;gap:.4rem;max-height:280px;overflow-y:auto}
 .fxlist::-webkit-scrollbar{width:3px}.fxlist::-webkit-scrollbar-thumb{background:var(--brd);border-radius:3px}
 .fxtag{display:flex;align-items:center;gap:.5rem;background:var(--suroff);border:1px solid var(--brd);border-radius:var(--r2);padding:.4rem .75rem;font-size:var(--tx);cursor:pointer;transition:all var(--tr)}
@@ -117,14 +119,17 @@ input{cursor:text}
 .card-src{margin-left:auto;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:999px;white-space:nowrap}
 .src-p{background:rgba(74,158,255,.15);color:var(--pri);border:1px solid rgba(74,158,255,.3)}
 .src-m{background:rgba(61,220,132,.15);color:var(--ok);border:1px solid rgba(61,220,132,.3)}
+.src-d{background:rgba(74,158,255,.12);color:var(--pri);border:1px solid rgba(74,158,255,.25)}
 .card-l{padding:.75rem 1rem;display:flex;flex-direction:column;gap:.4rem}
 .lnk{display:flex;align-items:center;gap:.5rem;padding:.4rem .75rem;border-radius:var(--r2);border:1px solid var(--brd);font-size:var(--tx);font-weight:600;font-family:var(--fm);text-decoration:none;transition:all var(--tr);color:inherit}
 .lnk.ma2{border-color:rgba(245,166,35,.4);background:rgba(245,166,35,.08);color:var(--ma2)}
 .lnk.ma3{border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.08);color:var(--ma3)}
 .lnk.avo{border-color:rgba(232,64,64,.4);background:rgba(232,64,64,.08);color:var(--avo)}
 .lnk.gdtf{border-color:rgba(155,89,182,.4);background:rgba(155,89,182,.08);color:var(--gdtf)}
+.lnk.drv,.lnk.web{border-color:var(--brd);background:var(--sur2);color:var(--muted)}
+.lnk.drv:hover,.lnk.web:hover{border-color:var(--pri);color:var(--pri)}
 .lnk-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
-.lnk-lbl{flex:1}
+.lnk-lbl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lnk-note{font-size:9px;opacity:.7;text-transform:none;letter-spacing:0}
 .lnk-ico{opacity:.6;flex-shrink:0}
 .pdf-prev{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r3);overflow:hidden}
@@ -217,7 +222,16 @@ mark{background:rgba(245,166,35,.25);color:var(--warn);border-radius:2px;padding
         <div class="chip on" data-c="ma3">grandMA3</div>
         <div class="chip on" data-c="avo">Avolites</div>
         <div class="chip on" data-c="gdtf">GDTF</div>
+        <div class="chip on" data-c="drive">Drive</div>
       </div>
+    </div>
+    <div>
+      <div class="sttl">Biblioteca Drive</div>
+      <a class="lnk drv" href="https://drive.google.com/drive/folders/1uTGZFq0P2G86kAfjZwgTFVwT96g-HX19" target="_blank" rel="noopener">
+        <span class="lnk-dot"></span><span class="lnk-lbl">Abrir carpeta completa</span>
+        <svg class="lnk-ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+      <div class="pinfo-m" id="drvCnt" style="margin-top:.4rem;font-size:var(--tx)">&mdash;</div>
     </div>
     <div id="detSec" style="display:none">
       <div class="sttl">Detectados <span id="detCnt" style="color:var(--pri);font-family:var(--fm)"></span></div>
@@ -247,9 +261,79 @@ if(PDFJS_OK){
 }else{
   console.warn('pdf.js no disponible: las funciones de PDF quedan desactivadas');
 }
+
+// DRIVE INDEX (drive-index.js)
+var DRIVE=[];
+function driveUrl(n){
+  return n.k==='f'?'https://drive.google.com/file/d/'+n.i+'/view':'https://drive.google.com/drive/folders/'+n.i;
+}
+function buildDrive(){
+  if(typeof window.DRIVE_INDEX==='undefined'||!window.DRIVE_INDEX)return;
+  function walk(node,path,brand){
+    if(!node||node.k!=='d')return;
+    var b=path.length===1?node.n:brand;
+    var d={name:node.n,path:path.join(' / '),url:driveUrl(node),files:[],childFolders:[],brand:b};
+    (node.c||[]).forEach(function(c){
+      if(c.k==='f')d.files.push({name:c.n,url:driveUrl(c)});
+      else if(c.k==='d')d.childFolders.push(c.n);
+    });
+    d.nameNorm=norm(d.name);
+    d.hay=norm(d.name+' '+d.path);
+    DRIVE.push(d);
+    (node.c||[]).forEach(function(c){walk(c,path.concat(node.n),b);});
+  }
+  if(window.DRIVE_INDEX.libraries)walk(window.DRIVE_INDEX.libraries,[],'');
+  if(window.DRIVE_INDEX.catalogs)walk(window.DRIVE_INDEX.catalogs,[],'');
+}
+buildDrive();
+(function(){
+  var c=document.getElementById('drvCnt');
+  if(!c)return;
+  c.textContent=DRIVE.length?DRIVE.length+' carpetas indexadas':'Indice no disponible';
+})();
+
+function driveMatches(ql){
+  if(!ql)return [];
+  var words=ql.split(' ').filter(Boolean),exact=[],part=[];
+  for(var i=0;i<DRIVE.length;i++){
+    var d=DRIVE[i];
+    var ok=d.hay.indexOf(ql)>=0||words.every(function(w){return d.hay.indexOf(w)>=0;});
+    if(!ok)continue;
+    (d.nameNorm.indexOf(ql)===0?exact:part).push(d);
+  }
+  return exact.concat(part).slice(0,12);
+}
+function driveFor(name){
+  var n=norm(name);
+  if(n.length<5)return null;
+  var best=null;
+  for(var i=0;i<DRIVE.length;i++){
+    var d=DRIVE[i];
+    if(d.nameNorm===n)return d;
+    if(!best&&d.nameNorm.indexOf(n)>=0)best=d;
+  }
+  return best;
+}
+function driveCard(d){
+  var files='';
+  d.files.slice(0,4).forEach(function(f){
+    files+='<a class="lnk drv" href="'+f.url+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl" title="'+esc(f.name)+'">'+esc(f.name)+'</span>'+EXT+'</a>';
+  });
+  if(d.files.length>4){
+    files+='<a class="lnk drv" href="'+d.url+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">+'+(d.files.length-4)+' archivo'+(d.files.length-4!==1?'s':'')+' mas en la carpeta</span>'+EXT+'</a>';
+  }
+  if(!d.files.length){
+    files+='<a class="lnk drv" href="'+d.url+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">Abrir carpeta en Drive</span>'+EXT+'</a>';
+  }
+  return '<div class="card drive" id="d-'+norm(d.path+' '+d.name).replace(/[^a-z0-9]+/g,'-')+'">'
+    +'<div class="card-h"><div class="card-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>'
+    +'<div style="min-width:0"><div class="card-n">'+hl(esc(d.name))+'</div><div class="card-m" title="'+esc(d.path)+'">'+esc(d.path)+'</div></div>'
+    +'<span class="card-src src-d">Drive</span></div>'
+    +'<div class="card-l">'+files+'</div></div>';
+}
 var pdfDoc=null,curPage=1,totPages=0,prevSec=null,cvs=null;
 var detected=[],manual=[];
-var consoles=new Set(['ma2','ma3','avo','gdtf']);
+var consoles=new Set(['ma2','ma3','avo','gdtf','drive']);
 var query='';
 
 function norm(s){
@@ -412,6 +496,29 @@ DB.forEach(function(entry){
   });
 });
 
+// Fixtures de la biblioteca Drive indexada (drive-index.js)
+var DRIVE_CONSOLE=/^(grand ?ma[123]|ma[123]|avolites|gdtf|chamsys|sunlite|onyx|lightshark|compulite|dmx ?live|wysiwyg|lt piccolo|obsidian|titan|pearl)/i;
+function addDriveFixtures(){
+  var seen={};
+  DRIVE.forEach(function(d){
+    var name=d.name.trim();
+    if(name.length<4)return;
+    if(/^[_@]/.test(name))return;
+    if(/^(v\d|app |ios|android|software|manual|cat[aá]logo|iluminaci[oó]n|sonido|descartado|utilidades|firmware|drivers?|presets?)/i.test(name))return;
+    if(DRIVE_CONSOLE.test(name))return;
+    if(!d.files.length&&!d.childFolders.some(function(c){return DRIVE_CONSOLE.test(c);}))return;
+    var key=norm(d.brand+':::'+name);
+    if(seen[key])return;
+    seen[key]=true;
+    ALLF.push({
+      name:name, mfr:d.brand,
+      normName:norm(name), normMfr:norm(d.brand),
+      mfrAliases:[], drive:d
+    });
+  });
+}
+addDriveFixtures();
+
 function findFixture(raw){
   var q=norm(raw);
   var hit=ALLF.find(function(f){return f.normName===q;});
@@ -569,7 +676,7 @@ function extractFixtures(text){
     var re=new RegExp('(?<![a-z0-9])'+esc+'(?![a-z0-9])');
     if(re.test(normText)){
       var k=f.mfr+':::'+f.name;
-      if(!found.has(k))found.set(k,{name:f.name,mfr:f.mfr,src:'pdf'});
+      if(!found.has(k))found.set(k,{name:f.name,mfr:f.mfr,src:'pdf',drive:f.drive});
     }
   });
   return Array.from(found.values());
@@ -583,7 +690,7 @@ function doManual(){
   var v=document.getElementById('manIn').value.trim();
   if(!v){toast('Escribe el nombre','wrn');return;}
   var hit=findFixture(v);
-  var fx=hit?{name:hit.name,mfr:hit.mfr,src:'manual'}:{name:v,mfr:'Unknown',src:'manual'};
+  var fx=hit?{name:hit.name,mfr:hit.mfr,src:'manual',drive:hit.drive}:{name:v,mfr:'Unknown',src:'manual'};
   var k=fx.mfr+':::'+fx.name;
   if(detected.find(function(f){return f.mfr+':::'+f.name===k;})||manual.find(function(f){return f.mfr+':::'+f.name===k;})){
     toast('Ya esta en la lista','nfo');return;
@@ -628,12 +735,15 @@ function hl(s){
 
 function links(fx){
   var q=encodeURIComponent(fx.name);
+  var mfr=fx.mfr&&fx.mfr!=='Unknown'?fx.mfr+' ':'';
+  var web=encodeURIComponent(mfr+fx.name+' (gdtf OR dmx OR manual)');
   return {
-    ma2:'https://www.malighting.com/training-support/fixture-shares/',
-    ma3:'https://gdtf-share.com/?page=gdtf&search='+q,
-    avo:'https://personalities.avolites.com/?mainPage=Main.asp&Search='+q,
-    avof:'https://www.avofixturefinder.com/?q='+q,
-    gdtf:'https://gdtf-share.com/?page=gdtf&search='+q
+    ma2:'https://fixtureshare.malighting.com/',
+    ma3:'https://gdtf-share.com/share.php?v=gdtf',
+    avo:'https://personalities.avolites.com/Main.asp?LightName='+q,
+    avof:'https://www.avofixturefinder.com/',
+    gdtf:'https://gdtf-share.com/share.php?v=gdtf',
+    web:'https://www.google.com/search?q='+web
   };
 }
 
@@ -674,16 +784,25 @@ function renderResults(){
         var words=ql.split(' ').filter(Boolean);
         if(f.normName.includes(ql)||f.normMfr.includes(ql)||words.every(function(w){return f.normName.includes(w)||f.normMfr.includes(w);})){
           var k=f.mfr+':::'+f.name;
-          if(!seen.has(k)){seen.add(k);sr.push({name:f.name,mfr:f.mfr,src:'search'});}
+          if(!seen.has(k)){seen.add(k);sr.push({name:f.name,mfr:f.mfr,src:'search',drive:f.drive});}
         }
       });
       filtered=sr.slice(0,16);
     }
   }
 
-  var html='<div class="rh"><div class="rh-t">Librerias de fixtures</div><div class="rh-c">'+filtered.length+' resultado'+(filtered.length!==1?'s':'')+'</div></div>';
+  var driveRes=[];
+  if(query&&consoles.has('drive'))driveRes=driveMatches(norm(query));
+  if(driveRes.length&&filtered.length){
+    var shown={};
+    filtered.forEach(function(f){shown[norm(f.name)]=true;});
+    driveRes=driveRes.filter(function(d){return !shown[d.nameNorm];});
+  }
+  var total=filtered.length+driveRes.length;
 
-  if(!filtered.length){
+  var html='<div class="rh"><div class="rh-t">Librerias de fixtures</div><div class="rh-c">'+total+' resultado'+(total!==1?'s':'')+'</div></div>';
+
+  if(!total){
     html+='<div class="empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><h3>Sin resultados</h3><p>Prueba otra busqueda o anade el fixture manualmente.</p></div>';
   } else {
     html+='<div class="grid">';
@@ -691,19 +810,31 @@ function renderResults(){
       var L=links(f);
       var badge=f.src==='pdf'?'<span class="card-src src-p">PDF</span>':f.src==='manual'?'<span class="card-src src-m">Manual</span>':'';
       var ls='';
-      if(consoles.has('ma2'))ls+='<a class="lnk ma2" href="'+L.ma2+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">grandMA2 FixtureShare</span>'+EXT+'</a>';
-      if(consoles.has('ma3'))ls+='<a class="lnk ma3" href="'+L.ma3+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">grandMA3 / GDTF Share</span>'+EXT+'</a>';
-      if(consoles.has('avo')){
-        ls+='<a class="lnk avo" href="'+L.avo+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">Avolites Personality Library</span>'+EXT+'</a>';
-        ls+='<a class="lnk avo" href="'+L.avof+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">AvoFixtureFinder <span class="lnk-note">(por canal DMX)</span></span>'+EXT+'</a>';
+      var used={};
+      function addLink(cls,href,label,note){
+        if(used[href])return;
+        used[href]=true;
+        ls+='<a class="lnk '+cls+'" href="'+href+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">'+label+(note?' <span class="lnk-note">'+note+'</span>':'')+'</span>'+EXT+'</a>';
       }
-      if(consoles.has('gdtf'))ls+='<a class="lnk gdtf" href="'+L.gdtf+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">GDTF Share (universal)</span>'+EXT+'</a>';
+      if(consoles.has('ma2'))addLink('ma2',L.ma2,'grandMA2 Fixture Share','(requiere cuenta)');
+      if(consoles.has('ma3'))addLink('ma3',L.ma3,'grandMA3 / GDTF Share','(requiere cuenta)');
+      if(consoles.has('avo')){
+        addLink('avo',L.avo,'Avolites Personality Library');
+        addLink('avo',L.avof,'AvoFixtureFinder','(buscar por DMX)');
+      }
+      if(consoles.has('gdtf'))addLink('gdtf',L.gdtf,'GDTF Share','(requiere cuenta)');
+      if(consoles.has('ma2')||consoles.has('ma3')||consoles.has('avo')||consoles.has('gdtf')){
+        addLink('web',L.web,'Buscar en la web','(planos DMX, GDTF, manuales)');
+      }
+      var dfx=f.drive||driveFor(f.name);
+      if(dfx)ls+='<a class="lnk drv" href="'+dfx.url+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl" title="Drive: '+esc(dfx.path)+'">Drive: '+esc(dfx.name)+'</span>'+EXT+'</a>';
       if(!ls)ls='<span style="font-size:10px;color:var(--faint);padding:4px">Selecciona al menos una consola</span>';
       html+='<div class="card" id="'+fxKey(f)+'">';
       html+='<div class="card-h"><div class="card-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="10" r="4"/><path d="M12 14v5M8 22h8M6 7l2 2M18 7l-2 2"/></svg></div>';
       html+='<div><div class="card-n">'+hl(esc(f.name))+'</div><div class="card-m">'+hl(esc(f.mfr))+'</div></div>'+badge+'</div>';
       html+='<div class="card-l">'+ls+'</div></div>';
     });
+    driveRes.forEach(function(d){html+=driveCard(d);});
     html+='</div>';
   }
 
