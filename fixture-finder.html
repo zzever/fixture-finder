@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300..700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="drive-index.js"></script>
 <style>
 :root,[data-theme="dark"]{
@@ -132,6 +133,17 @@ input{cursor:text}
 .lnk-lbl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lnk-note{font-size:9px;opacity:.7;text-transform:none;letter-spacing:0}
 .lnk-ico{opacity:.6;flex-shrink:0}
+.lnkcol{display:flex;flex-direction:column;gap:.4rem}
+.dz.mini{padding:.55rem .75rem;border-width:1px;border-radius:var(--r2)}
+.dz.mini .dz-t{font-size:var(--tx);margin:0}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:900;padding:1rem}
+.ov.on{display:flex}
+.ov-b{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r3);width:100%;max-width:860px;max-height:88dvh;display:flex;flex-direction:column;box-shadow:var(--sh3)}
+.ov-h{padding:.75rem 1rem;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+.ov-t{font-weight:600;font-size:var(--ts)}
+.ov-c{padding:1rem;overflow:auto}
+.ov textarea{width:100%;min-height:360px;background:var(--suroff);border:1px solid var(--brd);border-radius:var(--r2);padding:.75rem;font-family:var(--fm);font-size:11px;line-height:1.5;color:var(--txt);resize:vertical}
+.ov-f{padding:.75rem 1rem;border-top:1px solid var(--brd);display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap}
 .pdf-prev{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r3);overflow:hidden}
 .pdf-prev-h{padding:.6rem 1rem;border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;gap:.75rem}
 .pdf-prev-t{font-size:var(--tx);font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
@@ -233,6 +245,32 @@ mark{background:rgba(245,166,35,.25);color:var(--warn);border-radius:2px;padding
       </a>
       <div class="pinfo-m" id="drvCnt" style="margin-top:.4rem;font-size:var(--tx)">&mdash;</div>
     </div>
+    <div>
+      <div class="sttl">Bibliotecas</div>
+      <div class="lnkcol">
+        <a class="lnk web" href="https://open-fixture-library.org/" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">Open Fixture Library</span><svg class="lnk-ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        <a class="lnk web" href="https://www.mvrshare.com/" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">MVRshare <span class="lnk-note">(escenas MVR)</span></span><svg class="lnk-ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        <a class="lnk web" href="https://fixturebuilder.gdtf-share.com/" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">GDTF Builder <span class="lnk-note">(editor, requiere cuenta)</span></span><svg class="lnk-ico" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+    </div>
+    <div>
+      <div class="sttl">GDTF a QLab</div>
+      <label class="dz mini" style="display:block">
+        <input type="file" id="gfile" accept=".gdtf,.xml">
+        <div class="dz-t" id="gfileN">Cargar .gdtf o .xml</div>
+      </label>
+      <label class="dz mini" style="display:block;margin-top:.4rem">
+        <input type="file" id="gtpl" accept=".qlablight,.json">
+        <div class="dz-t" id="gtplN">Plantilla .qlablight (opcional)</div>
+      </label>
+      <div class="man-add">
+        <input type="password" id="gkey" placeholder="Clave API de Gemini" autocomplete="off">
+        <button class="btnadd" id="gkeyBtn">Guardar</button>
+      </div>
+      <button class="btnana" id="gconv" style="margin-top:.5rem">Convertir con Gemini</button>
+      <button class="btnadd" id="gprompt" style="width:100%;justify-content:center;margin-top:.4rem">Copiar prompt (sin clave)</button>
+      <div class="pinfo-m" id="gStat" style="margin-top:.4rem;font-size:10px;line-height:1.4">La clave se guarda solo en este navegador.</div>
+    </div>
     <div id="detSec" style="display:none">
       <div class="sttl">Detectados <span id="detCnt" style="color:var(--pri);font-family:var(--fm)"></span></div>
       <div class="fxlist" id="fxlist"></div>
@@ -252,6 +290,13 @@ mark{background:rgba(245,166,35,.25);color:var(--warn);border-radius:2px;padding
     <div id="res" style="display:none"></div>
   </main>
 </div>
+</div>
+<div class="ov" id="ov">
+  <div class="ov-b">
+    <div class="ov-h"><span class="ov-t">Definicion QLab generada &middot; revisar antes de importar</span><button class="rmv" id="ovX" aria-label="Cerrar"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="ov-c"><textarea id="ovTa" spellcheck="false"></textarea></div>
+    <div class="ov-f"><button class="btnadd" id="ovCopy">Copiar</button><button class="btnadd" id="ovDl">Descargar .qlablight</button></div>
+  </div>
 </div>
 <div class="toast-wrap" id="tw"></div>
 <script>
@@ -350,7 +395,8 @@ var DB=[
     'Axcor Beam 300','Axcor Wash 600','Axcor Spot 400','Axcor Spot 900',
     'Mythos','Mythos 2','Xtylos','Xtylos Aqua','HY B-EYE K25',
     'Tambora Linear','Tambora Flash','Scenius Unico','Scenius Profile','Scenius Spot','Scenius Wash',
-    'Super Sharpy','Mini-B','Mini-B EVO','Panify','K20','K10']},
+    'Super Sharpy','Mini-B','Mini-B EVO','Panify','K20','K10',
+    'Golden Scan 3','Stage Color 1200','Super Scan Zoom','Alpha Spot 575','Alpha Wash 575']},
   {m:'Robe',a:['robe lighting'],n:[
     'MegaPointe','Pointe','BMFL Spot','BMFL Wash','BMFL WashBeam','BMFL FollowSpot',
     'Spiider','iSpiider','LEDBeam 150','LEDBeam 350','LEDBeam 500','LEDBeam 1000',
@@ -474,6 +520,27 @@ var DB=[
     'Celeb 201 LED','Celeb 401 LED',
     'Diva-Lite 21','Diva-Lite 31',
     'FreeStyle 21 LED','FreeStyle 31 LED']},
+  {m:'High End Systems',a:['high end','highend','hes'],n:[
+    'SolaSpot Pro 1500','SolaSpot Pro 1000','SolaHyBeam 1000','SolaHyBeam 2000',
+    'SolaFrame 650','SolaFrame 1000','SolaPix 19','SolaPix 37',
+    'Studio Beam','Studio Spot 575','Studio Color 575','TechnoArc','TechnoBeam',
+    'TurboRay','ShowPix']},
+  {m:'Coemar',n:[
+    'Infinity Spot S','Infinity Spot LED','Reflection LEDko','Parlite 575',
+    'ProSpot 250LX','iSpot 575','iWash 575','LEDko P']},
+  {m:'Studio Due',a:['studiodue'],n:[
+    'CityColor 2500','ColorBlock','Giant LED','Archiled','Nano LED']},
+  {m:'DTS',a:['dts lighting'],n:[
+    'Synergy 5 Spot','Synergy 7 Spot','Jack','Nick','Wonder','XR 1200','Katana']},
+  {m:'Anolis',n:['ArcSource 24MC','ArcSource 48MC','ArcLine Outdoor','ArcPar 100','ArcPod 9']},
+  {m:'Griven',n:['Kolorado 2','Jade 24','Jade 48','Prometheus 1200','Ronda 4000']},
+  {m:'ADB',a:['adb lighting'],n:['Aurore CYC','Aurore Wash','Orkis 250','Warp 250','Freedom 250','Eurospot']},
+  {m:'LDR',a:['ldr lighting'],n:['Astor 200','Astor 300','Nota 250','Nota 400','Canto 250','Kali 300','Xeno 250']},
+  {m:'Eurolite',n:['LED TMH-80','LED TMH-X4','LED PSW-5','LED ML-56','LED PFE-20','LED KLS-180']},
+  {m:'Futurelight',a:['future light'],n:['PHS-260','PHS-280','DMH-160','DMH-260','PLB-4','PFE-1200']},
+  {m:'Briteq',n:['BT-BEAM250','BT-MOVBEAM LED','BT-PARLED','BT-STAGEBEAM','BT-WASH18']},
+  {m:'Blizzard',a:['blizzard lighting'],n:['Lumina Wash 19x15','Flurry 5','Torrent FZ','HotBox 5','Snowball','Hypno Spot']},
+  {m:'Iluminarc',a:['ilumipanel'],n:['Ilumipanel 100','Logi 24','Coloris 12','Ilumipod 42']},
   {m:'Generic',a:['generico','convencional'],n:[
     'PAR64','PAR56','PAR38','PAR 64','PAR 56','PAR 38',
     'Fresnel','PC','Ellipsoidal','Profile Spot',
@@ -482,7 +549,11 @@ var DB=[
     'Strobe','LED Strobe','Dimmer','Dimmer Pack',
     'Cyclorama','Cyc Light','LED Cyc','Blinder','LED Blinder',
     'Followspot','Follow Spot','UV Par','UV Bar',
-    'Hazer','Fogger','Haze Machine','PAR Can','LED PAR']},
+    'Hazer','Fogger','Haze Machine','PAR Can','LED PAR',
+    'Beam 230','Beam 200','Beam 5R','Beam 7R','Beam 10R','Beam 15R','Beam 380',
+    'Spot 230','Wash 230','Mini Beam',
+    'LED PAR 54x3','LED PAR 18x18','LED Bar 16x3','Sunstrip',
+    'Strobe 1500','Strobe LED','Laser RGB']},
 ];
 
 var ALLF=[];
@@ -737,12 +808,14 @@ function links(fx){
   var q=encodeURIComponent(fx.name);
   var mfr=fx.mfr&&fx.mfr!=='Unknown'?fx.mfr+' ':'';
   var web=encodeURIComponent(mfr+fx.name+' (gdtf OR dmx OR manual)');
+  var mvr=encodeURIComponent('site:mvrshare.com '+mfr+fx.name);
   return {
-    ma2:'https://fixtureshare.malighting.com/',
-    ma3:'https://gdtf-share.com/share.php?v=gdtf',
+    ma:'https://fixtureshare.malighting.com/',
+    gdtf:'https://gdtf-share.com/share.php?v=gdtf',
     avo:'https://personalities.avolites.com/Main.asp?LightName='+q,
     avof:'https://www.avofixturefinder.com/',
-    gdtf:'https://gdtf-share.com/share.php?v=gdtf',
+    ofl:'https://open-fixture-library.org/search?q='+q,
+    mvr:'https://www.google.com/search?q='+mvr,
     web:'https://www.google.com/search?q='+web
   };
 }
@@ -816,16 +889,15 @@ function renderResults(){
         used[href]=true;
         ls+='<a class="lnk '+cls+'" href="'+href+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl">'+label+(note?' <span class="lnk-note">'+note+'</span>':'')+'</span>'+EXT+'</a>';
       }
-      if(consoles.has('ma2'))addLink('ma2',L.ma2,'grandMA2 Fixture Share','(requiere cuenta)');
-      if(consoles.has('ma3'))addLink('ma3',L.ma3,'grandMA3 / GDTF Share','(requiere cuenta)');
+      if(consoles.has('ma2')||consoles.has('ma3'))addLink('ma2',L.ma,'MA Share','(grandMA2 y grandMA3 - requiere cuenta)');
+      if(consoles.has('gdtf'))addLink('gdtf',L.gdtf,'GDTF Share','(requiere cuenta)');
       if(consoles.has('avo')){
         addLink('avo',L.avo,'Avolites Personality Library');
         addLink('avo',L.avof,'AvoFixtureFinder','(buscar por DMX)');
       }
-      if(consoles.has('gdtf'))addLink('gdtf',L.gdtf,'GDTF Share','(requiere cuenta)');
-      if(consoles.has('ma2')||consoles.has('ma3')||consoles.has('avo')||consoles.has('gdtf')){
-        addLink('web',L.web,'Buscar en la web','(planos DMX, GDTF, manuales)');
-      }
+      addLink('web',L.ofl,'Open Fixture Library','(definiciones DMX)');
+      addLink('web',L.mvr,'MVRshare','(via Google)');
+      addLink('web',L.web,'Buscar en la web','(planos DMX, GDTF, manuales)');
       var dfx=f.drive||driveFor(f.name);
       if(dfx)ls+='<a class="lnk drv" href="'+dfx.url+'" target="_blank" rel="noopener"><span class="lnk-dot"></span><span class="lnk-lbl" title="Drive: '+esc(dfx.path)+'">Drive: '+esc(dfx.name)+'</span>'+EXT+'</a>';
       if(!ls)ls='<span style="font-size:10px;color:var(--faint);padding:4px">Selecciona al menos una consola</span>';
@@ -849,6 +921,137 @@ function renderResults(){
     if(prev)res.insertBefore(prev,res.firstChild);
   }
 }
+
+// GDTF -> QLAB (.qlablight) CON GEMINI
+var GKEY='ff_gemini_key', gdtfXml='', gdtfName='', tplJson='';
+function gstat(msg,type){
+  var el=document.getElementById('gStat');
+  if(!el)return;
+  el.textContent=msg||'';
+  el.style.color=type==='err'?'var(--err)':type==='ok'?'var(--ok)':'var(--muted)';
+}
+(function(){
+  try{
+    if(localStorage.getItem(GKEY)){
+      document.getElementById('gkey').placeholder='Clave guardada (escribi otra para cambiarla)';
+      gstat('Clave de Gemini guardada en este navegador');
+    }
+  }catch(e){}
+})();
+document.getElementById('gkeyBtn').addEventListener('click',function(){
+  var i=document.getElementById('gkey'),v=i.value.trim();
+  try{
+    if(!v){
+      localStorage.removeItem(GKEY);
+      i.placeholder='Clave API de Gemini';
+      gstat('Clave borrada de este navegador');toast('Clave borrada','nfo');return;
+    }
+    localStorage.setItem(GKEY,v);
+    i.value='';i.placeholder='Clave guardada (escribi otra para cambiarla)';
+    gstat('Clave guardada solo en este navegador','ok');toast('Clave de Gemini guardada','ok');
+  }catch(e){gstat('No se pudo guardar la clave: '+e.message,'err');}
+});
+document.getElementById('gfile').addEventListener('change',function(e){
+  var f=e.target.files[0];
+  if(!f)return;
+  gdtfName=f.name.replace(/\.(gdtf|xml)$/i,'');
+  document.getElementById('gfileN').textContent=f.name;
+  if(/\.xml$/i.test(f.name)){
+    f.text().then(function(t){gdtfXml=t;gstat('XML cargado ('+Math.round(t.length/1024)+' KB)','ok');});
+    return;
+  }
+  if(typeof JSZip==='undefined'){gstat('No se pudo cargar JSZip: subi el description.xml','err');return;}
+  gstat('Leyendo '+f.name+'...');
+  JSZip.loadAsync(f).then(function(z){
+    var x=z.file(/(^|\/)description\.xml$/i)[0];
+    if(!x)throw new Error('el .gdtf no contiene description.xml');
+    return x.async('string');
+  }).then(function(t){
+    gdtfXml=t;gstat('GDTF leido ('+Math.round(t.length/1024)+' KB)','ok');toast('GDTF listo para convertir','ok');
+  }).catch(function(err){gstat('Error al leer el GDTF: '+err.message,'err');});
+});
+document.getElementById('gtpl').addEventListener('change',function(e){
+  var f=e.target.files[0];
+  if(!f)return;
+  f.text().then(function(t){
+    tplJson=t;
+    document.getElementById('gtplN').textContent=f.name;
+    gstat('Plantilla cargada: Gemini copiara su estructura','ok');
+  });
+});
+function geminiPrompt(){
+  var p='Converti esta definicion de fixture GDTF en una definicion de instrumento de QLab 5, es decir un archivo .qlablight en JSON.\n'
+    +'Reglas: una sola definicion con nombre unico y fabricante; parametros en el orden de los canales DMX del modo elegido; para cada parametro indica nombre, canal DMX y si usa 16 bits; elegi el modo DMX "Standard" o el primero disponible y reflejalo en el nombre.\n'
+    +'Responde SOLO con el JSON valido, sin markdown y sin explicaciones.\n';
+  if(tplJson)p+='\nIMPORTANTE: copia exactamente la estructura, las claves y los tipos de esta plantilla .qlablight real y solo reemplaza los valores:\n<<<PLANTILLA\n'+tplJson.slice(0,20000)+'\nPLANTILLA>>>\n';
+  p+='\nDefinicion GDTF (description.xml):\n<<<GDTF\n'+gdtfXml.slice(0,60000)+'\nGDTF>>>';
+  return p;
+}
+function copyText(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t);
+  return new Promise(function(res,rej){
+    var ta=document.createElement('textarea');
+    ta.value=t;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');res();}catch(e){rej(e);}
+    ta.remove();
+  });
+}
+document.getElementById('gprompt').addEventListener('click',function(){
+  if(!gdtfXml){gstat('Carga primero un .gdtf o su description.xml','err');return;}
+  copyText(geminiPrompt()).then(function(){
+    toast('Prompt copiado: pegalo en Gemini','ok');gstat('Prompt copiado al portapapeles','ok');
+  },function(){gstat('No se pudo copiar el prompt','err');});
+});
+document.getElementById('gconv').addEventListener('click',function(){
+  if(!gdtfXml){gstat('Carga primero un .gdtf o su description.xml','err');return;}
+  var key=(document.getElementById('gkey').value||'').trim();
+  if(!key){try{key=localStorage.getItem(GKEY)||'';}catch(e){}}
+  if(!key){gstat('Falta la clave de Gemini (se guarda solo en tu navegador)','err');return;}
+  var b=this;b.disabled=true;gstat('Consultando a Gemini...');
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-goog-api-key':key},
+    body:JSON.stringify({contents:[{parts:[{text:geminiPrompt()}]}],generationConfig:{temperature:0.2,responseMimeType:'application/json'}})
+  }).then(function(r){
+    return r.json().then(function(j){
+      if(!r.ok)throw new Error((j.error&&j.error.message)||('HTTP '+r.status));
+      return j;
+    });
+  }).then(function(j){
+    var parts=(j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts)||[];
+    var t=parts.map(function(x){return x.text||'';}).join('');
+    if(!t)throw new Error('respuesta vacia');
+    showQlab(t);
+    gstat('JSON generado: revisalo antes de importarlo en QLab','ok');
+  }).catch(function(err){
+    gstat('Error: '+err.message,'err');toast('Gemini: '+err.message,'wrn');
+  }).then(function(){b.disabled=false;});
+});
+function showQlab(t){
+  var ta=document.getElementById('ovTa');
+  try{ta.value=JSON.stringify(JSON.parse(t),null,2);}catch(e){ta.value=t;}
+  document.getElementById('ov').classList.add('on');
+}
+document.getElementById('ovX').addEventListener('click',function(){
+  document.getElementById('ov').classList.remove('on');
+});
+document.getElementById('ov').addEventListener('click',function(e){
+  if(e.target===this)this.classList.remove('on');
+});
+document.getElementById('ovCopy').addEventListener('click',function(){
+  copyText(document.getElementById('ovTa').value).then(function(){toast('Copiado','ok');});
+});
+document.getElementById('ovDl').addEventListener('click',function(){
+  var t=document.getElementById('ovTa').value;
+  if(!t){toast('Nada para descargar','wrn');return;}
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([t],{type:'application/json'}));
+  a.download=(gdtfName||'fixture')+'.qlablight';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},1500);
+  toast('Descargado '+a.download,'ok');
+});
 </script>
 </body>
 </html>
