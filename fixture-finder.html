@@ -391,6 +391,7 @@ function norm(s){
 var DB=[
   {m:'Clay Paky',a:['claypaky','clay-paky','clay paky'],n:[
     'Sharpy','Sharpy Plus','Sharpy Wash 330','B-EYE K10','B-EYE K20',
+    'Aleda B-EYE K20','Aleda K20 B-EYE','Aleda B-EYE K10','Aleda K10 B-EYE',
     'Alpha Spot HPE 1500','Alpha Spot QWO 800','Alpha Beam 1500','Alpha Beam 700',
     'Alpha Wash 1500','Alpha Wash 700','Axcor Profile 400','Axcor Profile 900',
     'Axcor Beam 300','Axcor Wash 600','Axcor Spot 400','Axcor Spot 900',
@@ -550,6 +551,7 @@ var DB=[
     'Strobe','LED Strobe','Dimmer','Dimmer Pack',
     'Cyclorama','Cyc Light','LED Cyc','Blinder','LED Blinder',
     'Followspot','Follow Spot','UV Par','UV Bar',
+    'Molefay','Molefay Four Light','Molefay 4-Light','Molefay 8-Light',
     'Hazer','Fogger','Haze Machine','PAR Can','LED PAR',
     'Beam 230','Beam 200','Beam 5R','Beam 7R','Beam 10R','Beam 15R','Beam 380',
     'Spot 230','Wash 230','Mini Beam',
@@ -703,6 +705,23 @@ function renderPg(n){
 // ANALYZE
 document.getElementById('btnAna').addEventListener('click',analyzePDF);
 
+// Agrupa los fragmentos de texto en renglones reales (misma Y, ordenados por X).
+function pageText(tc){
+  var rows=[],tol=2;
+  (tc.items||[]).forEach(function(it){
+    if(!it.str)return;
+    var y=Math.round(it.transform[5]/tol)*tol,x=it.transform[4],r=null;
+    for(var i=0;i<rows.length;i++){if(rows[i].y===y){r=rows[i];break;}}
+    if(!r){r={y:y,items:[]};rows.push(r);}
+    r.items.push({x:x,s:it.str});
+  });
+  rows.sort(function(a,b){return b.y-a.y;});
+  return rows.map(function(r){
+    r.items.sort(function(a,b){return a.x-b.x;});
+    return r.items.map(function(i){return i.s;}).join(' ');
+  }).join('\n');
+}
+
 function analyzePDF(){
   if(!pdfDoc){toast('Carga un PDF','wrn');return;}
   document.getElementById('btnAna').disabled=true;
@@ -728,7 +747,7 @@ function analyzePDF(){
     pdfDoc.getPage(pg).then(function(p){
       return p.getTextContent();
     }).then(function(tc){
-      txt+=tc.items.map(function(x){return x.str;}).join(' ')+'\n';
+      txt+=pageText(tc)+'\n';
     }).catch(function(e){
       console.warn('No se pudo leer la pagina '+pg,e);
     }).then(function(){
@@ -742,14 +761,30 @@ function analyzePDF(){
 
 function extractFixtures(text){
   var found=new Map();
-  var normText=norm(text);
-  ALLF.forEach(function(f){
-    var esc=f.normName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    var re=new RegExp('(?<![a-z0-9])'+esc+'(?![a-z0-9])');
-    if(re.test(normText)){
-      var k=f.mfr+':::'+f.name;
-      if(!found.has(k))found.set(k,{name:f.name,mfr:f.mfr,src:'pdf',drive:f.drive});
-    }
+  function reEsc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+  String(text).split('\n').forEach(function(line){
+    // Descarta la columna de opciones: "Channels: 4; Lamp: High; Operation: Strobe" -> "...".
+    var body=line.split(';').map(function(seg){
+      var c=seg.indexOf(':');
+      return c>=0?seg.slice(0,c):seg;
+    }).join(' ');
+    var n=norm(body);
+    if(!n)return;
+    var hits=[];
+    ALLF.forEach(function(f){
+      var re=new RegExp('(?<![a-z0-9])'+reEsc(f.normName)+'(?![a-z0-9])','g');
+      var m;re.lastIndex=0;
+      while((m=re.exec(n))!==null)hits.push({f:f,s:m.index,e:m.index+m[0].length});
+    });
+    // El nombre mas largo gana: "Aleda K20 B-EYE" por encima de "K20".
+    hits.sort(function(a,b){return (b.e-b.s)-(a.e-a.s);});
+    var taken=[];
+    hits.forEach(function(h){
+      if(taken.some(function(t){return h.s<t.e&&t.s<h.e;}))return;
+      taken.push(h);
+      var k=h.f.mfr+':::'+h.f.name;
+      if(!found.has(k))found.set(k,{name:h.f.name,mfr:h.f.mfr,src:'pdf',drive:h.f.drive});
+    });
   });
   return Array.from(found.values());
 }
