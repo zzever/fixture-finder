@@ -14,7 +14,7 @@ const LIMIT_DAY = 40;
 const WINDOW_HOUR = 3600000;
 const WINDOW_DAY = 86400000;
 
-const SYS = 'Sos un conversor tecnico de definiciones de fixtures de iluminacion escenica. '
+const SYS = 'Eres un conversor tecnico de definiciones de fixtures de iluminacion escenica. '
   + 'Recibis el description.xml de un GDTF y devolves unicamente el JSON de una definicion '
   + 'de instrumento para QLab 5 (.qlablight). No agregas comentarios, markdown ni explicaciones.';
 
