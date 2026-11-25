@@ -128,13 +128,17 @@ async function handleQlab(request, env) {
     return j(504, { ok: false, error: timedOut ? 'Gemini tardo demasiado en responder' : 'No se pudo contactar a Gemini' });
   }
 
+  let raw = '';
+  try { raw = await res.text(); } catch (e) { raw = ''; }
   let data = null;
-  try { data = await res.json(); } catch (e) { /* respuesta no JSON */ }
+  try { data = JSON.parse(raw); } catch (e) { /* respuesta no JSON */ }
 
   if (!res.ok) {
-    const msg = data && data.error && data.error.message ? String(data.error.message) : ('HTTP ' + res.status);
+    const err = data && data.error ? data.error : null;
+    const msg = err && err.message ? String(err.message) : ('HTTP ' + res.status);
+    const detail = err ? { status: err.status || '', code: err.code || res.status } : { raw: raw.slice(0, 400) };
     const status = res.status === 429 ? 429 : 502;
-    return j(status, { ok: false, error: 'Gemini: ' + msg.slice(0, 300) });
+    return j(status, { ok: false, error: 'Gemini: ' + msg.slice(0, 300), detail: detail });
   }
 
   const cand = data && data.candidates && data.candidates[0];
