@@ -1,3 +1,0 @@
-Los enlaces de GDTF aparecen dos veces en GMA3 y en Universal. En lugar de tener tres enlaces separados, unifiquémoslos como Mashare y GDTF.- Hacer push a GitHub- Mejorar la base de datos- Vincular con la biblioteca Open Fixture- Vincular con MVR Share- Usar la API de Géminis para convertir GDTF a .qlablight- Explorar más opciones con el editor GDTF en línea
-
-Fuentes:- https://plsn.com/articles/feeding-the-machines/build-your-own-fixture-library/
